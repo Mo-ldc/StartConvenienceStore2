@@ -45,13 +45,14 @@ export class uiPayRent extends BaseUI {
     
         // 没有失败界面 先临时这样
         // 目前从新开始 清除所有数据
-        GameData.PlayerCoin = GameSetting.PlayerCoin;
-        GameData.PlayerOrderNum = 0;
-        GameData.IsDaySettlement = false;
-        GameData.GameDay = 0;
-        GameData.PayRent = 1000;
-        MessMgr.emit(GameEvent.NewDay);
-        MessMgr.emit(GameEvent.UpdateGold);
+        // GameData.PlayerCoin = GameSetting.PlayerCoin;
+        // GameData.PlayerOrderNum = 0;
+        // GameData.IsDaySettlement = false;
+        // GameData.GameDay = 0;
+        // GameData.PayRent = 1000;
+        // MessMgr.emit(GameEvent.NewDay);
+        // MessMgr.emit(GameEvent.UpdateGold);
+        UIMgr.getInstance().showPage(UIName.uiFail);
     }
 
     /** 点击交租 */
@@ -63,6 +64,7 @@ export class uiPayRent extends BaseUI {
         // 可以按天数增加房租
         //
         GameData.PlayerCoin -= GameData.PayRent;
+        AudioMgr.PlaySound(AudioName.PayCoin);
         GameData.IsDaySettlement = false;
         MessMgr.emit(GameEvent.NewDay);
         MessMgr.emit(GameEvent.UpdateGold);

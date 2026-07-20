@@ -47,6 +47,7 @@ export class ResConfig {
         { resKey: "uiNews", resType: ResType.Prefab, bundleName: "uiNews", path: "Prefabs/uiNews" },
         { resKey: "uiTutorial", resType: ResType.Prefab, bundleName: "uiTutorial", path: "Prefabs/uiTutorial" },
         { resKey: "uiResult", resType: ResType.Prefab, bundleName: "uiResult", path: "Prefabs/uiResult" },
+        { resKey: "uiFail", resType: ResType.Prefab, bundleName: "uiFail", path: "Prefabs/uiFail" },
     ]
     public static RoomResArr: ResData[] = [
         { resKey: "LobbyRoom", resType: ResType.Prefab, bundleName: "LobbyRoom", path: "Prefabs/LobbyRoom" },

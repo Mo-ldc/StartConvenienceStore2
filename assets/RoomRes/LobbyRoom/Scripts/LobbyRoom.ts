@@ -99,6 +99,7 @@ export class LobbyRoom extends BaseRoom {
 
     init(...args: any[]): void {
         super.init(...args);
+        AudioMgr.OnlyPlayMusic(AudioName.Main);
         this.numShow.active = false;
         this.priceNode.active = false;
         this.orderNode.scale = new Vec3(0, 0, 1);
@@ -198,6 +199,7 @@ export class LobbyRoom extends BaseRoom {
     addMobile(mobile: Node, markDamaged: boolean = false): void {
         this.mobile = mobile;
         mobile.parent = this.mobileAni;
+        mobile.scale = new Vec3(0.8, 0.8, 1);
         let op = mobile.getComponent(UIOpacity);
         if (!op) op = mobile.addComponent(UIOpacity);
         op.opacity = 0;
@@ -223,7 +225,7 @@ export class LobbyRoom extends BaseRoom {
     /** 初始化订单信息 */
     private initOrderInfo(order: OrderModel,roleName:string): void {
         this.roleName.string = roleName;
-        this.orderLabel.string = order.demandDialogue;
+        this.orderLabel.string = order.demandDialogue.talkContent;
         this.orderTag.string = OrderType[order.orderType];
     }
     /** 初始化属性面板 */
@@ -263,7 +265,7 @@ export class LobbyRoom extends BaseRoom {
                 // NPC 接受 → 走订单接受流程
                 this.hideBut();
                 if (this.order && this.order.acceptDialogue) {
-                    this.showOrderInfo(this.order.acceptDialogue);
+                    this.showOrderInfo(this.order.acceptDialogue.talkContent);
                 }
                 this.scheduleOnce(() => {
                     this.priceNode && (this.priceNode.active = false);
@@ -273,7 +275,8 @@ export class LobbyRoom extends BaseRoom {
             case 'reject':
                 // NPC 拒绝但可重新出价 → 按钮保持显示
                 // 还价
-                this.showOrderInfo(this.order.bargainDialogue);
+                this.showOrderInfo(this.order.bargainDialogue.talkContent);
+                console.warn("NPC 还价：",data.price);
                 MessMgr.emit(GameEvent.UpdatePriceLabel, data.price);
                 break;
             case 'final_reject':
@@ -287,7 +290,7 @@ export class LobbyRoom extends BaseRoom {
                     .to(0.3, { scale: new Vec3(0, 0, 1) })
                     .start();
                 if (this.order && this.order.rejectDialogue) {
-                    this.showOrderInfo(this.order.rejectDialogue);
+                    this.showOrderInfo(this.order.rejectDialogue.talkContent);
                 }
                 this.scheduleOnce(() => {
                     tween(this.orderNode)
@@ -317,7 +320,7 @@ export class LobbyRoom extends BaseRoom {
 
     /** 点击出价按钮 */
     onClickPrice(): void {
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        AudioMgr.PlaySound(AudioName.BtnClick2);
         UIMgr.getInstance().showDialog(UIName.uiBid);
     }
 
@@ -325,10 +328,10 @@ export class LobbyRoom extends BaseRoom {
 
     /** 点击接受按钮 */
     onClickAccept(): void {
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        AudioMgr.PlaySound(AudioName.BtnClick2);
         console.log("点击接受订单");
         this.hideBut();
-        this.showOrderInfo(this.order.acceptDialogue);
+        this.showOrderInfo(this.order.acceptDialogue.talkContent);
         this.scheduleOnce(() => {
             MessMgr.emit(GameEvent.MobileMoveToRepairRoom, this.order.mobileKey);
         }, 1);
@@ -339,13 +342,14 @@ export class LobbyRoom extends BaseRoom {
     
     /** 点击成交按钮 */
     onClickDeal(): void {
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        AudioMgr.PlaySound(AudioName.BtnClick2);
         if (!this.order) return;
         GameData.PlayerOrderNum = GameData.PlayerOrderNum + 1;
 
         // 1. 播放金币飞行动画
        
         GameData.PlayerCoin += this.order.orderPriceDecided;
+        AudioMgr.PlaySound(AudioName.ReceiveCoin);
         MessMgr.emit(GameEvent.UpdateGold);
         this.generateGold(this.role.node.worldPosition.clone(),20);
 
@@ -358,7 +362,7 @@ export class LobbyRoom extends BaseRoom {
 
         // 5. 显示完成对话
         if (this.order.completeDialogue) {
-            this.showOrderInfo(this.order.completeDialogue);
+            this.showOrderInfo(this.order.completeDialogue.talkContent);
         }
 
         // 6. 1s后客人离开，刷新
@@ -373,7 +377,7 @@ export class LobbyRoom extends BaseRoom {
 
     /** 点击拒绝按钮 */
     onClickReject(): void {
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        AudioMgr.PlaySound(AudioName.BtnClick2);
         GameData.PlayerOrderNum = GameData.PlayerOrderNum + 1;
         // CtrMgr.getInstance().ctrLv?.rejectOrder();
         console.log("点击拒绝");
@@ -386,7 +390,7 @@ export class LobbyRoom extends BaseRoom {
             .to(0.3, { scale: new Vec3(0, 0, 1) })
             .start();
         if(this.order && this.order.rejectDialogue){
-            this.showOrderInfo(this.order.rejectDialogue);
+            this.showOrderInfo(this.order.rejectDialogue.talkContent);
             this.scheduleOnce(()=>{
                 tween(this.orderNode)
                     .to(0.3, { scale: new Vec3(0, 0, 1) })

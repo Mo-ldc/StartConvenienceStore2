@@ -76,3 +76,9 @@ export enum PartSide {
     背面 = 2,
 }
 Enum(PartSide);
+
+/** 性别 */
+export enum Gender {
+    男 = 0,
+    女 = 1,
+}

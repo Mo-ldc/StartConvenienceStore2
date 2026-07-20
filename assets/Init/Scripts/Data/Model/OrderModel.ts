@@ -1,3 +1,4 @@
+import { TalkConfigData } from "../Data/ConfigData";
 import { OrderType, PartType } from "../Type/ObjType";
 
 /**
@@ -34,16 +35,18 @@ export class OrderModel{
     
     guestName: string = "";
     /** 需求对话 */
-    demandDialogue: string = "";
+    demandDialogue: TalkConfigData = null;
     /** 完成对话 */
-    completeDialogue: string = "";
+    completeDialogue: TalkConfigData = null;
     /** 被拒绝对话 */
-    rejectDialogue: string = "";
+    rejectDialogue: TalkConfigData = null;
     /** 被接受对话 */
-    acceptDialogue: string = "";
+    acceptDialogue: TalkConfigData = null;
 
     /** 砍价对话 */
-    bargainDialogue: string = "";
+    bargainDialogue: TalkConfigData = null;
+    /** 砍价对话模板（含{price}占位符） */
+    bargainTemplate: string = "";
 
     /** 手机键 */
     mobileKey: string = "";

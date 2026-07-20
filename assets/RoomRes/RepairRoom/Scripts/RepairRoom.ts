@@ -13,7 +13,7 @@ import { MobileConfig } from 'db://assets/Init/Scripts/Data/Configs/MobileConfig
 import { UIMgr } from 'db://assets/Init/Scripts/Mgr/UIMgr';
 import { BaseBar } from 'db://assets/Init/Scripts/UI/UIComponent/BaseBar';
 import { Quality } from 'db://assets/Init/Scripts/Data/Enum/Enum';
-import { PartType } from 'db://assets/Init/Scripts/Data/Type/ObjType';
+import { PartType, RepairToolType } from 'db://assets/Init/Scripts/Data/Type/ObjType';
 import { PartBase } from 'db://assets/Init/Scripts/Game/Part/PartBase';
 
 const { ccclass, property } = _decorator;
@@ -74,6 +74,9 @@ export class RepairRoom extends BaseRoom {
 
     @property({ type: Label, tooltip: '步骤标签' })
     public  stepLabel : Label = null;
+
+    @property({ type: Sprite, tooltip: '提示使用工具图片' })
+    public toolSpr: Sprite = null;
 
     /** 故障标签 */
     @property({ type: Label, tooltip: '故障标签' })
@@ -299,6 +302,15 @@ export class RepairRoom extends BaseRoom {
         }
         if (this.stepLabel) {
             this.stepLabel.string = hint.message;
+            
+        }
+        if(this.toolSpr){
+            let tool = this.toolQueue.find(t => t.toolType === hint.toolType);
+            if(tool){
+                this.toolSpr.spriteFrame = tool.dragShowSpriteFrame;
+            }else{
+                this.toolSpr.spriteFrame = null;
+            }
         }
         if (this.faultLabel) {
             const damaged = this.repairMobile.getDamagedPartType();
@@ -314,6 +326,14 @@ export class RepairRoom extends BaseRoom {
             if (this.toolProgressBar.node.active) {
                 this.toolProgressBar.node.active = false;
             }
+            if (this.usingTool) {
+                this.usingTool.hideAnimation();
+                this.usingTool.stopSound();
+                this.dragShow.getComponent(Sprite).enabled = true;
+            }
+            return;
+        }
+        if(this.usingTool.toolType === RepairToolType.无 || this.usingTool.toolType == RepairToolType.螺丝){
             return;
         }
         this.toolProgressBar.upDatePos(this.usingTool.node.worldPosition.clone());
@@ -337,6 +357,7 @@ export class RepairRoom extends BaseRoom {
                     .to(0.1, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'bounceOut' })
                     .start();
                 this.dragShow.spriteFrame = tool.dragShowSpriteFrame;
+                this.dragShow.getComponent(Sprite).enabled = true;
                 this.dragShow.node.setWorldPosition(tool.node.worldPosition);
                 MessMgr.emit(GameEvent.PickUpTool, tool.toolType);
                 return;
@@ -387,17 +408,25 @@ export class RepairRoom extends BaseRoom {
         if (this.usingTool.isIntersectingPart) {
             if (this.usingTool.isStepComplete) {
                 this.usingTool.hideAnimation();
+                this.usingTool.stopSound();
+                this.dragShow.getComponent(Sprite).enabled = true;
             } else {
                 this.usingTool.showAnimation(activePart.node.worldPosition);
+                this.usingTool.playSound();
+                this.dragShow.getComponent(Sprite).enabled = false;
             }
         } else {
             this.usingTool.hideAnimation();
+            this.usingTool.stopSound();
+            this.dragShow.getComponent(Sprite).enabled = true;
         }
     }
     public onTouchEnd(event: EventTouch) {
         const tool = this.usingTool;
         if(tool){
             tool.hideAnimation();
+            tool.stopSound();
+            
             tool.backToInitPosition();
             this.dragShow.spriteFrame = null;
             this.usingTool = null;
@@ -411,6 +440,7 @@ export class RepairRoom extends BaseRoom {
             return;
         }
         this.mobile = mobile;
+        mobile.scale = new Vec3(1, 1, 1);
         mobile.parent = this.workbench;
         mobile.active = false;
         mobile.active = true;

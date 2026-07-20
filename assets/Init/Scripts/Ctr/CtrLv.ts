@@ -9,12 +9,15 @@ import { OrderConfig } from '../Data/Configs/OrderConfig';
 import { PlotConfig } from '../Data/Configs/PlotConfig';
 import GameSetting from '../Data/Setting/GameSetting';
 import { UIMgr, UIName } from '../Mgr/UIMgr';
+import { RoleConfig } from '../Data/Configs/RoleConfig';
+import { RoleConfigData } from '../Data/Data/ConfigData';
 const { ccclass } = _decorator;
 
 @ccclass('CtrLv')
 export class CtrLv extends CtrBase {
     /** 当前订单 */
     private curOrder: OrderModel = null;
+    public roleData: RoleConfigData = null;
 
     registerEvent(): void {
         MessMgr.on(GameEvent.PlayerBid, this.onPlayerBid, this);
@@ -36,8 +39,9 @@ export class CtrLv extends CtrBase {
 
     /** 初始化当前订单（随机配置 + 随机对话） */
     private initOrder(): void {
-
+        this.roleData = RoleConfig.random();
         this.curOrder = new OrderModel();
+        this.curOrder.guestName = this.roleData.roleName;
         const orderConfig = OrderConfig.random();
         // console.log("随机订单:", orderConfig);
         this.curOrder.orderKey = orderConfig.orderKey;
@@ -47,17 +51,21 @@ export class CtrLv extends CtrBase {
         this.curOrder.quality = orderConfig.quality ?? 0;
         this.curOrder.partType = orderConfig.partType ?? 0;
 
+        // knowledge: 0→看不出假货, 1→10%, 2→30%, 3→50%
         this.curOrder.knowledge = this.randomRange(0, 3);
+        // wealth: 0→150%, 1→200%, 2→250%, 3→300%
         this.curOrder.wealth = this.randomRange(0, 3);
+        // patience: 0→不砍价, 1→1次, 2→2次, 3→3次
         this.curOrder.patience = this.randomRange(0, 3);
         this.curOrder.mobileKey = orderConfig.mobileKey;
 
         // 根据零件类型生成请求对话
-        this.curOrder.demandDialogue = PlotConfig.getRequestDialogue(this.curOrder.partType);
+        this.curOrder.demandDialogue = PlotConfig.getRequestDialogue(this.curOrder.partType, this.roleData.sex);
         this.curOrder.completeDialogue = PlotConfig.getPhaseDialogue("complete");
         this.curOrder.rejectDialogue = PlotConfig.getPhaseDialogue("reject");
         this.curOrder.acceptDialogue = PlotConfig.getPhaseDialogue("accept");
         this.curOrder.bargainDialogue = PlotConfig.getPhaseDialogue("bargain");
+        this.curOrder.bargainTemplate = this.curOrder.bargainDialogue?.talkContent ?? "";
         
     }
     /** 计算当天租金 */
@@ -129,14 +137,14 @@ export class CtrLv extends CtrBase {
     private onPlayerBid(price: number): void {
         if (!this.curOrder) return;
 
-        // wealth: 0→只能接受参考价, 1→150%, 2→200%, 3→250%
-        const wealthMult = 1 + (this.curOrder.wealth ?? 0) * 0.5;
+        // wealth: 0→150%, 1→200%, 2→250%, 3→300%
+        const wealthMult = 1.5 + (this.curOrder.wealth ?? 0) * 0.5;
         const maxAccept = this.curOrder.orderPriceReference * wealthMult;
 
         // patience: 0→不砍价, 1→1次, 2→2次, 3→3次
         const maxBargains = this.curOrder.patience ?? 0;
         this.curOrder.bargainCount = (this.curOrder.bargainCount ?? 0) + 1;
-
+        console.warn("当前订单出价次数:", this.curOrder.bargainCount, "最大出价次数:", maxBargains, "价格:", price, "接受价格:", maxAccept);
         if (price <= maxAccept) {
             this.curOrder.orderPriceDecided = price;
             MessMgr.emit(GameEvent.UpdatePriceLabel, price);
@@ -145,12 +153,18 @@ export class CtrLv extends CtrBase {
                 message: '对方接受了这个价格！',
             });
         } else if (this.curOrder.bargainCount <= maxBargains) {
+            // 客人还价：逐渐逼近极限价格
+            const refPrice = this.curOrder.orderPriceReference;
+            const bidIdx = this.curOrder.bargainCount;
+            const npcPrice = Math.round(refPrice + (maxAccept - refPrice) * (bidIdx / (maxBargains + 1)));
+
+            const bargainMsg = (this.curOrder.bargainTemplate || '{price}').replace('{price}', String(npcPrice));
+            this.curOrder.bargainDialogue.talkContent = bargainMsg;
+
             MessMgr.emit(GameEvent.NpcBidResult, {
-                result: 'reject', price: price,
-                message: `对方拒绝，还能还价${maxBargains - this.curOrder.bargainCount + 1}次`,
+                result: 'reject', price: npcPrice,
+                message: bargainMsg,
             });
-            // 维持原价
-            MessMgr.emit(GameEvent.UpdatePriceLabel, this.curOrder.orderPriceDecided);
         } else {
             MessMgr.emit(GameEvent.NpcBidResult, {
                 result: 'final_reject', price: price,

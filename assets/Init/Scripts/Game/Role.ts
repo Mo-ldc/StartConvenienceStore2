@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Sprite, SpriteFrame, tween, UIOpacity, Vec3 } from 'cc';
+import { AudioMgr, AudioName } from '../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 
 @ccclass('Role')
@@ -34,6 +35,7 @@ export class Role extends Component {
 
     /** 显示角色 */
     showRole(callback?: Function) {
+        AudioMgr.PlaySound(AudioName.GuestCome);
         let op = this.node.getComponent(UIOpacity);
         if(!op) op = this.node.addComponent(UIOpacity);
         op.opacity = 0;

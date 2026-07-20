@@ -1,5 +1,6 @@
 import { _decorator, Component, Enum, EventTouch, Node, SpriteFrame, tween, UITransform, Vec3 } from 'cc';
 import { RepairToolType } from '../Data/Type/ObjType';
+import { AudioMgr, AudioName } from '../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 /**
  * 修复工具
@@ -23,10 +24,18 @@ export class RepairTool extends Component {
     @property({ type: Node, tooltip: '动画节点' })
     public animationNode: Node = null;
 
+    /** 使用工具声音 */
+    @property({ type: Enum(AudioName), tooltip: '使用工具声音' })
+    public useToolSound: AudioName = AudioName.None;
+
+
     /** 是否与零件相交 */
     public isIntersectingPart: boolean = false;
     /** 当步骤是否完成 */
     public isStepComplete: boolean = false;
+
+    /** 是否正在播放音效 */
+    private isPlayingSound: boolean = false;
 
     protected onLoad(): void {
         this.initPosition = this.node.position.clone();
@@ -39,6 +48,7 @@ export class RepairTool extends Component {
         // console.log('拖拽的时候展示的');
         this.isIntersectingPart = false;
         this.isStepComplete = false;
+        // AudioMgr.PlaySound(AudioName.PickPart)
         tween(this.node)
             .to(0.2, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'bounceOut' })
             .start();
@@ -68,8 +78,21 @@ export class RepairTool extends Component {
         // console.log('隐藏动画');
         if (this.animationNode) {
             this.animationNode.active = false;
-            
         }
+    }
+
+    /** 播放对应的声音 */
+    public playSound(){
+        if(!this.isPlayingSound && this.useToolSound != AudioName.None){
+            AudioMgr.PlaySound(this.useToolSound, null,true);
+            this.isPlayingSound = true;
+        }
+    }
+    public stopSound(){
+        if(this.useToolSound != AudioName.None){
+            AudioMgr.StopOneSound(this.useToolSound);
+        }
+        this.isPlayingSound = false;
     }
 
     /** 检测点击位置是否和自己相交 */

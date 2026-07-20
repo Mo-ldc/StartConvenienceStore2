@@ -2,8 +2,6 @@ import { ShopConfigData, ShopListConfigData } from "../Data/ConfigData";
 import { Quality } from "../Enum/Enum";
 import { GoodsType, PartType } from "../Type/ObjType";
 export class ShopConfig{
-    /** 零件列表 */
-
     //零件
     /** 后盖  */
     private static backCover: ShopConfigData[] = [

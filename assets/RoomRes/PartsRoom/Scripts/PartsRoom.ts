@@ -115,7 +115,7 @@ export class PartsRoom extends BaseRoom {
      * @param data 种类配置数据
      */
     private onClickTypeBtn(data: ShopListConfigData): void {
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        AudioMgr.PlaySound(AudioName.BtnClick3);
         this.showShopList(data);
     }
 

@@ -63,7 +63,8 @@ export class uiMain extends BaseUI {
             return;
         }
         // console.warn("点击按钮", btnSrc.node.name," ", btnSrc.roomType);
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        // AudioMgr.PlaySound(AudioName.BtnClick);
+        AudioMgr.PlaySound(AudioName.BtnClick4);
         MessMgr.emit(GameEvent.ChangeRoom, btnSrc.roomType);
     }
     private changeRoom(roomEnum: RoomEnum): void {

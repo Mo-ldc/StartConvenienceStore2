@@ -1,5 +1,6 @@
 import { _decorator, CCBoolean, CCFloat, Component, Enum, Node, tween, TweenEasing, UIOpacity, Vec3 } from 'cc';
 import { UIMgr } from '../../Mgr/UIMgr';
+import { AudioMgr, AudioName } from '../../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 
 /**UI切换动画状态 */
@@ -261,6 +262,7 @@ export class BaseUI extends Component {
 
     /** 关闭界面 */
     private close() {
+        AudioMgr.PlaySound(AudioName.BtnClick2);
         if(this._isShow){
             this._isShow = false;
             this.hide();

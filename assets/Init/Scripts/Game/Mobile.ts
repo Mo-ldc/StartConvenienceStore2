@@ -5,6 +5,7 @@ import { MobileConfigData } from '../Data/Data/ConfigData';
 import { PartType, RepairToolType } from '../Data/Type/ObjType';
 import { MessMgr } from '../Mgr/MessMgr';
 import { GameEvent } from '../Data/Enum/GameEvent';
+import { AudioMgr, AudioName } from '../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 
 @ccclass('Mobile')
@@ -31,6 +32,9 @@ export class Mobile extends Component {
 
     private isHitMobile: boolean = false;
     public mobileInfo: MobileConfigData = null;
+    
+    /** 是否已经显示已经完成 */
+    public isComplete: boolean = false;
 
     protected onLoad(): void {
         this.initParts();
@@ -103,6 +107,7 @@ export class Mobile extends Component {
 
     public showMobile(isFront: boolean) {
         this.isFront = isFront;
+        AudioMgr.PlaySound(AudioName.MobileFlip);
         this.front.active = this.isFront;
         this.back.active = !this.isFront;
     }
@@ -328,7 +333,10 @@ export class Mobile extends Component {
             if (part.isFixed || !part.needsFix) continue;
             return hintPart(part, '固定');
         }
-
+        if(!this.isComplete){
+            this.isComplete = true;
+            AudioMgr.PlaySound(AudioName.RepairComplete);
+        }
         return { action: 'complete', partType: damagedType, toolType: RepairToolType.无, message: '修理完成' };
     }
 }

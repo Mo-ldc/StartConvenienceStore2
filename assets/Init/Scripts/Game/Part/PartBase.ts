@@ -5,6 +5,7 @@ import { MessMgr } from '../../Mgr/MessMgr';
 import { GameEvent } from '../../Data/Enum/GameEvent';
 import { Mobile } from '../Mobile';
 import { GlowOutline } from '../../../Shader/GlowOutline/GlowOutline';
+import { AudioMgr, AudioName } from '../../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 /** 工具作用配置 */
 @ccclass('PartToolSet')
@@ -62,7 +63,7 @@ export class PartBase extends Component {
     public partSide: PartSide = PartSide.无;
 
     /** 当前相交的工具类型 */
-    private usingToolType: RepairToolType = RepairToolType.无;
+    protected usingToolType: RepairToolType = RepairToolType.无;
     /** 是否在被操作 */
     public isBeingOperated: boolean = false;
 
@@ -171,12 +172,12 @@ export class PartBase extends Component {
     /** 多边形碰撞组件  */
     private polygon: PolygonCollider2D = null; // 多边形碰撞组件  */
 
-    @property({ displayName: '描边颜色' })
+    // @property({ displayName: '描边颜色' })
     outlineColor: Color = new Color(255, 0, 0, 255);
-    @property({ displayName: '外描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向透明区域扩展(UV单位)' })
+    // @property({ displayName: '外描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向透明区域扩展(UV单位)' })
     outlineWidth: number = 0.0;
-    @property({ displayName: '内描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向像素内部侵蚀(UV单位)' })
-    innerWidth: number = 0.003;
+    // @property({ displayName: '内描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向像素内部侵蚀(UV单位)' })
+    innerWidth: number = 0.006;
     /** 外发光组件 */
     private glowOut:GlowOutline = null;
 
@@ -343,6 +344,7 @@ export class PartBase extends Component {
                 this.currentToolIndex = 0;
                 this.useTime = 0;
             }
+            AudioMgr.PlaySound(AudioName.StepComplete);
             this.usingToolType = RepairToolType.无;
             this.isBeingOperated = false;
         }

@@ -4,6 +4,7 @@ import { PartScrew } from './PartScrew';
 import { RepairToolType } from '../../Data/Type/ObjType';
 import { MessMgr } from '../../Mgr/MessMgr';
 import { GameEvent } from '../../Data/Enum/GameEvent';
+import { AudioMgr, AudioName } from '../../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 
 @ccclass('PartMotherboard')
@@ -53,8 +54,10 @@ export class PartMotherboard extends PartBase {
         if (screw) {
             screw.unscrew();
             let screw2 = this.findScrewedScrew();
+            AudioMgr.PlaySound(AudioName.ToolScrew);
             console.error("拧下螺丝", screw.node.name)
             if(!screw2){
+                AudioMgr.PlaySound(AudioName.StepComplete);
                 this.isFixed = false;
             }
             return;
@@ -63,19 +66,19 @@ export class PartMotherboard extends PartBase {
     }
      /** update */
     protected update(dt: number): void {
-        if (!this.isIntersectingTool) return;
-        if (!this.isOnPhone()) { this.isIntersectingTool = false; return; }
+        if (!this.isBeingOperated) return;
+        if (!this.isOnPhone()) { this.isBeingOperated = false; return; }
     }
     protected onCheckToolPartIntersection(data: { worldPosition: Vec2, worldRect: Rect, toolType: RepairToolType }): void {
         if (!this.isOnPhone() || this.isCovered) {
-            this.isIntersectingTool = false;
+            this.isBeingOperated = false;
             return;
         }
-        this.isIntersectingTool = this.hitTest(data.worldPosition) || this.rectHitTest(data.worldRect);
-        if (this.isIntersectingTool) {
-            this.currentAppliedTool = data.toolType;
+        this.isBeingOperated = this.hitTest(data.worldPosition) || this.rectHitTest(data.worldRect);
+        if (this.isBeingOperated) {
+            this.usingToolType = data.toolType;
         }
-        console.warn("主板", this.node.name, "工具类型:", RepairToolType[data.toolType], "是否相交:", this.isIntersectingTool)
+        console.warn("主板", this.node.name, "工具类型:", RepairToolType[data.toolType], "是否相交:", this.isBeingOperated)
     }
     // ── 工具交互：螺丝工具给主板上螺丝 ──
 
@@ -88,8 +91,8 @@ export class PartMotherboard extends PartBase {
         super.onPickUpTool(toolType);
     }
 
-    protected onPutDownTool(toolType: RepairToolType): void {
-        if(this.isIntersectingTool){
+    protected onPutDownTool(): void {
+        if(this.isBeingOperated){
             console.log("主板相交")
         }else{
             console.log("主板不相交")
@@ -99,19 +102,21 @@ export class PartMotherboard extends PartBase {
         }else{
             console.log("主板不在手机上")
         }
-        if (toolType === RepairToolType.螺丝 && this.isIntersectingTool && this.isOnPhone()) {
+        if (this.usingToolType === RepairToolType.螺丝 && this.isBeingOperated && this.isOnPhone()) {
             const screw = this.findUnscrewedScrew();
             if (screw) {
                 console.error("拧上:", screw.node.name);
+                AudioMgr.PlaySound(AudioName.ToolScrew);
                 screw.screw();
                 let screw2 = this.findUnscrewedScrew();
                 if (!screw2) {
+                    AudioMgr.PlaySound(AudioName.StepComplete);
                     this.isFixed = true;
                 }
             }
         }
-        console.warn("放下:", RepairToolType[toolType]);
-        super.onPutDownTool(toolType);
+        console.warn("放下:", RepairToolType[this.usingToolType]);
+        super.onPutDownTool();
     }
 
     /**  */

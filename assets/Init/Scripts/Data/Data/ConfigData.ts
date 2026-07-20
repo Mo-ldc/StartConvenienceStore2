@@ -1,4 +1,4 @@
-import { Quality } from "../Enum/Enum";
+import { Gender, Quality } from "../Enum/Enum";
 import { OrderState } from "../State/State";
 import { GoodsType, OrderType, PartType } from "../Type/ObjType";
 
@@ -26,6 +26,8 @@ export class RoleConfigData{
     roleKey: string = "";
     /** 角色名称  */
     roleName?: string = "";
+    /** 性别  */
+    sex?: Gender = Gender.男;
 }
 /** 剧情数据 */
 export class PlotConfigData{
@@ -97,8 +99,22 @@ export class LoanConfigData {
     loanKey: string = "";
     /** 贷款金额 */
     loanAmount: number = 0;
+    /** 利率 */
+    loanRate: number = 0;
     /** 是否需要看广告 */
     needAd: boolean = false;
+}
+/** 价格文本数据 */
+export class TalkConfigData {
+
+    /** 价格文本键  */
+    talkKey: string = "";
+    /** 文本内容  */
+    talkContent: string = "";
+    /** 性别 */
+    sex?: Gender = Gender.男;
+    /** 私有参数 */
+    num?: number = 0;
 }
 
 

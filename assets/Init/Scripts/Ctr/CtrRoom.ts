@@ -61,9 +61,7 @@ export class CtrRoom extends CtrBase  {
         if (this.lobbyRoom) {
             // 根据需求来创建角色 创建维修手机
             const data = ctrLv.getCurrentOrder();
-            const roleData = RoleConfig.random();
-            data.guestName = roleData.roleName;
-
+            const roleData = ctrLv.roleData;
             this.lobbyRoom.initOrder(data, roleData.roleKey);
         }
 

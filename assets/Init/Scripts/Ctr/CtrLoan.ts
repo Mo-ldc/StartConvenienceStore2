@@ -5,6 +5,7 @@ import { GameData } from '../Data/Data/GameData';
 import { GameEvent } from '../Data/Enum/GameEvent';
 import { MessMgr } from '../Mgr/MessMgr';
 import { LoanRecordData } from '../Data/Data/SaveData';
+import { AudioMgr, AudioName } from '../Mgr/AudioMgr';
 const { ccclass } = _decorator;
 
 /**
@@ -103,6 +104,7 @@ export class CtrLoan extends CtrBase {
         // 到账 + 累计负债
         GameData.PlayerCoin += cfg.loanAmount;
         GameData.PlayerLoan += cfg.loanAmount;
+        AudioMgr.PlaySound(AudioName.ReceiveCoin);
 
         // 标记已贷并缓存
         const record = this.getRecord(loanKey);

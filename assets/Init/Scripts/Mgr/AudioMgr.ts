@@ -15,7 +15,50 @@ export enum AudioName {
     Lose = "bgm_lose",
     /** 按钮点击音效  */
     BtnClick = "btn",
-   
+
+    /** 完成步骤 */
+    StepComplete = "step_complete",
+
+
+    /** 客人来了 */
+    GuestCome = "guest_come",
+    /** 维修完成 */
+    RepairComplete = "repair_complete",
+    /** 手机翻转 */
+    MobileFlip = "mobile_flip",
+
+    /** 拿起零件 */
+    PickPart = "pick_part",
+
+    /** 工具 拧螺丝 */
+    ToolScrew = "tool_screw",
+    /** 工具 刮刀 */
+    ToolScissors = "tool_scissors",
+    /** 工具吸盘 */
+    ToolVacuum = "tool_vacuum",
+    /** 工具热风枪 */
+    ToolHotAir = "tool_hot_air",
+    /** 工具镊子 */
+    ToolNippers = "tool_nippers",
+    /** 工具 烙铁 */
+    ToolIron = "tool_iron",
+    /** 工具 喷液体 */
+    ToolSpray = "tool_spray",
+    /** 工具 擦拭（抹布） */
+    ToolWipe = "tool_wipe",
+
+    /** 花钱 */
+    PayCoin = "pay_coin",
+    /** 收钱 */
+    ReceiveCoin = "receive_coin",
+
+    /** 按钮2 点击计算机，点击勾，点击叉 */
+    BtnClick2 = "btn2",
+
+    /**按钮3 点击配件类型 弹窗选择 */
+    BtnClick3 = "btn3",
+    /** 点击切换模块 */
+    BtnClick4 = "btn4",
 };
 Enum(AudioName)
 const { ccclass, property } = _decorator;

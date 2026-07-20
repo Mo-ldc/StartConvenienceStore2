@@ -4,6 +4,7 @@ import { GameData } from 'db://assets/Init/Scripts/Data/Data/GameData';
 import { Quality } from 'db://assets/Init/Scripts/Data/Enum/Enum';
 import { GameEvent } from 'db://assets/Init/Scripts/Data/Enum/GameEvent';
 import { PartType } from 'db://assets/Init/Scripts/Data/Type/ObjType';
+import { AudioMgr, AudioName } from 'db://assets/Init/Scripts/Mgr/AudioMgr';
 import { MessMgr } from 'db://assets/Init/Scripts/Mgr/MessMgr';
 import { UIMgr } from 'db://assets/Init/Scripts/Mgr/UIMgr';
 const { ccclass, property } = _decorator;
@@ -139,6 +140,7 @@ export class ShopItem extends Component {
             return;
         }
         GameData.PlayerCoin -= this.shopData.shopPrice;
+        AudioMgr.PlaySound(AudioName.PayCoin);
 
         console.log("购买成功:", this.shopData.shopName);
         GameData.setObjectStorageData(this.objKey, { count: saveData.count + 1, isUnlocked: true });
