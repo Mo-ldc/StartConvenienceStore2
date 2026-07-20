@@ -7,7 +7,7 @@ const { ccclass, property } = _decorator;
 @ccclass('RepairTool')
 export class RepairTool extends Component {
     /** 初始世界坐标位置 */
-    private initWorldPosition: Vec3 = new Vec3();
+    private initPosition: Vec3 = new Vec3();
 
     @property({ type: Enum(RepairToolType), tooltip: '工具类型' })
     public toolType: RepairToolType = RepairToolType.无;
@@ -23,15 +23,22 @@ export class RepairTool extends Component {
     @property({ type: Node, tooltip: '动画节点' })
     public animationNode: Node = null;
 
+    /** 是否与零件相交 */
+    public isIntersectingPart: boolean = false;
+    /** 当步骤是否完成 */
+    public isStepComplete: boolean = false;
+
     protected onLoad(): void {
-        this.initWorldPosition = this.node.worldPosition.clone();
-        console.log('初始化世界坐标位置', this.initWorldPosition.toString());
+        this.initPosition = this.node.position.clone();
+        console.log('初始化世界坐标位置', this.initPosition.toString());
         this.hideAnimation();
     }
 
     /** 拖拽的时候展示的 */
     public dragShow(){
         // console.log('拖拽的时候展示的');
+        this.isIntersectingPart = false;
+        this.isStepComplete = false;
         tween(this.node)
             .to(0.2, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'bounceOut' })
             .start();
@@ -44,7 +51,7 @@ export class RepairTool extends Component {
             .to(0.2, { scale: new Vec3(1, 1, 1) })
             .start();
         tween(this.node)
-            .to(0.2, { worldPosition: this.initWorldPosition })
+            .to(0.2, { position: this.initPosition })
             .start();
     }
     /** 显示动画 */

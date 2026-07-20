@@ -1,4 +1,4 @@
-import { _decorator, Component, Enum, EventTouch, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Tween, tween, UITransform } from 'cc';
+import { _decorator, Component, Enum, EventTouch, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, Tween, tween, UITransform, Vec3 } from 'cc';
 import { GameEvent } from 'db://assets/Init/Scripts/Data/Enum/GameEvent';
 import { BaseRoom } from 'db://assets/Init/Scripts/Game/BaseRoom';
 import { Mobile } from 'db://assets/Init/Scripts/Game/Mobile';
@@ -85,7 +85,7 @@ export class RepairRoom extends BaseRoom {
     /** 工具队列 */
     public  toolQueue: RepairTool[] = [];
     /** 当前选择的工具 */
-    public  currentSelectedTool: RepairTool = null;
+    public  usingTool: RepairTool = null;
 
 
     /** 零件种类列表 */
@@ -107,7 +107,6 @@ export class RepairRoom extends BaseRoom {
     @property({ type: Prefab, tooltip: '零件按钮预制体' })
     public  partBtnPrefab: Prefab = null;
 
-
     init(...args: any[]): void {
         super.init(...args);
         this.initToolQueue();
@@ -118,11 +117,20 @@ export class RepairRoom extends BaseRoom {
     registerEvent(): void {
         super.registerEvent();
         MessMgr.on(GameEvent.OrderCompleted, this.onOrderCompleted, this);
+        MessMgr.on(GameEvent.PartStepChanged, this.onPartStepChanged, this);
     }
 
     resetEvent(): void {
         super.resetEvent();
         MessMgr.off(GameEvent.OrderCompleted, this.onOrderCompleted, this);
+        MessMgr.off(GameEvent.PartStepChanged, this.onPartStepChanged, this);
+    }
+
+    private onPartStepChanged(part: PartBase): void {
+        if (!this.usingTool) return;
+        if (part.isCurrentPhaseDone()) {
+            this.usingTool.isStepComplete = true;
+        }
     }
     /** 初始化工具队列 */
     private initToolQueue() {
@@ -302,13 +310,13 @@ export class RepairRoom extends BaseRoom {
 
     protected update(dt: number): void {
         this.updateHintLabels();
-        if (!this.currentSelectedTool) {
+        if (!this.usingTool || !this.usingTool.isIntersectingPart || this.usingTool.isStepComplete) {
             if (this.toolProgressBar.node.active) {
                 this.toolProgressBar.node.active = false;
             }
             return;
         }
-        this.toolProgressBar.upDatePos(this.currentSelectedTool.node.worldPosition.clone());
+        this.toolProgressBar.upDatePos(this.usingTool.node.worldPosition.clone());
 
         const part = this.repairMobile?.getActiveTooledPart();
         if (!part) return;
@@ -323,8 +331,11 @@ export class RepairRoom extends BaseRoom {
         for (let i = 0; i < this.toolQueue.length; i++) {
             const tool = this.toolQueue[i];
             if (tool.checkClickPosition(event)) {
-                this.currentSelectedTool = tool;
+                this.usingTool = tool;
                 tool.dragShow();
+                tween(this.dragShow.node)
+                    .to(0.1, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'bounceOut' })
+                    .start();
                 this.dragShow.spriteFrame = tool.dragShowSpriteFrame;
                 this.dragShow.node.setWorldPosition(tool.node.worldPosition);
                 MessMgr.emit(GameEvent.PickUpTool, tool.toolType);
@@ -354,11 +365,11 @@ export class RepairRoom extends BaseRoom {
             .start();
     }
     public onTouchMove(event: EventTouch) {
-        if (!this.currentSelectedTool) return;
+        if (!this.usingTool) return;
         const delta = event.getUIDelta();
-        if (this.currentSelectedTool.isSelfMove) {
-            this.currentSelectedTool.node.x += delta.x;
-            this.currentSelectedTool.node.y += delta.y;
+        if (this.usingTool.isSelfMove) {
+            this.usingTool.node.x += delta.x;
+            this.usingTool.node.y += delta.y;
         }
         this.dragShow.node.x += delta.x;
         this.dragShow.node.y += delta.y;
@@ -367,16 +378,29 @@ export class RepairRoom extends BaseRoom {
         MessMgr.emit(GameEvent.CheckToolPartIntersection, {
             worldPosition: worldPos,
             worldRect: dragRect,
-            tool: this.currentSelectedTool,
+            toolType: this.usingTool.toolType,
         });
+
+        const activePart = this.repairMobile?.getActiveTooledPart();
+        this.usingTool.isIntersectingPart = activePart != null;
+
+        if (this.usingTool.isIntersectingPart) {
+            if (this.usingTool.isStepComplete) {
+                this.usingTool.hideAnimation();
+            } else {
+                this.usingTool.showAnimation();
+            }
+        } else {
+            this.usingTool.hideAnimation();
+        }
     }
     public onTouchEnd(event: EventTouch) {
-        const tool = this.currentSelectedTool;
+        const tool = this.usingTool;
         if(tool){
             tool.hideAnimation();
             tool.backToInitPosition();
             this.dragShow.spriteFrame = null;
-            this.currentSelectedTool = null;
+            this.usingTool = null;
             this.toolProgressBar.node.active = false;
             MessMgr.emit(GameEvent.PutDownTool, tool.toolType);
         }

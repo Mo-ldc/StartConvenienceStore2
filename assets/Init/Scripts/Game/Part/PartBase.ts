@@ -1,11 +1,9 @@
 import { _decorator, Collider2D, Color, Component, Enum, EventTouch, Intersection2D, Node, PolygonCollider2D, Rect, sp, Sprite, SpriteFrame, tween, UIOpacity, UITransform, Vec2, Vec3 } from 'cc';
 import { PartType, RepairToolType } from '../../Data/Type/ObjType';
 import { PartSide } from '../../Data/Enum/Enum';
-
 import { MessMgr } from '../../Mgr/MessMgr';
 import { GameEvent } from '../../Data/Enum/GameEvent';
 import { Mobile } from '../Mobile';
-import { RepairTool } from '../RepairTool';
 import { GlowOutline } from '../../../Shader/GlowOutline/GlowOutline';
 const { ccclass, property } = _decorator;
 /** 工具作用配置 */
@@ -63,10 +61,10 @@ export class PartBase extends Component {
     /** 零件所在面 */
     public partSide: PartSide = PartSide.无;
 
-    /** 零件是否和工具相交 */
-    public isIntersectingTool: boolean = false;
-    /** 当前作用于本零件的工具类型 */
-    public currentAppliedTool: RepairToolType = RepairToolType.无;
+    /** 当前相交的工具类型 */
+    private usingToolType: RepairToolType = RepairToolType.无;
+    /** 是否在被操作 */
+    public isBeingOperated: boolean = false;
 
     /** 手机节点引用 */
     public mobileNode: Node = null;
@@ -94,9 +92,9 @@ export class PartBase extends Component {
     }
 
     protected update(dt: number): void {
-        if (!this.isIntersectingTool) return;
-        if (!this.isOnPhone()) { this.isIntersectingTool = false; return; }
-        if (this.getCurrentRequiredTool() !== this.currentAppliedTool) { this.isIntersectingTool = false; return; }
+        if (!this.isBeingOperated) return;
+        if (!this.isOnPhone()) { return; }
+        if (this.getCurrentRequiredTool() !== this.usingToolType) { this.isBeingOperated = false; return; }
         this.addToolTime(dt);
     }
 
@@ -204,6 +202,7 @@ export class PartBase extends Component {
             this.isFixed = false;
             this.currentToolIndex = this.unfixToolArr.length;
         }
+        this.isBeingOperated = false;
     }
 
     /** 复制后的初始化 */
@@ -344,8 +343,8 @@ export class PartBase extends Component {
                 this.currentToolIndex = 0;
                 this.useTime = 0;
             }
-            this.isIntersectingTool = false;
-            this.currentAppliedTool = RepairToolType.无;
+            this.usingToolType = RepairToolType.无;
+            this.isBeingOperated = false;
         }
     }
 
@@ -416,30 +415,30 @@ export class PartBase extends Component {
         }
     }
     /** 放下工具 */
-    protected onPutDownTool(toolType: RepairToolType): void {
+    protected onPutDownTool(): void {
         this.hideGlowOut();
-        this.isIntersectingTool = false;
-        this.currentAppliedTool = RepairToolType.无;
+        this.isBeingOperated = false;
+        this.usingToolType = RepairToolType.无;
     }
     /** 检测工具与零件是否相交 */
-    protected onCheckToolPartIntersection(data: { worldPosition: Vec2, worldRect: Rect, tool:RepairTool }): void {
+    protected onCheckToolPartIntersection(data: { worldPosition: Vec2, worldRect: Rect, toolType: RepairToolType }): void {
+
         if (!this.isOnPhone() || this.isCovered) {
-            this.isIntersectingTool = false;
+            this.isBeingOperated = false;
             return;
         }
-        if (this.getCurrentRequiredTool() !== data.tool.toolType) {
-            // console.warn("工具类型不匹配：", this.node.name, "需要:", RepairToolType[this.getCurrentRequiredTool()], "有:", RepairToolType[data.tool.toolType]);
-            this.isIntersectingTool = false;
+        if (this.getCurrentRequiredTool() !== data.toolType) {
+            this.isBeingOperated = false;
             return;
         }
-        this.isIntersectingTool = this.hitTest(data.worldPosition) || this.rectHitTest(data.worldRect);
-        if (this.isIntersectingTool) {
-            this.currentAppliedTool = data.tool.toolType;
-            data.tool.showAnimation();
+        let isIntersecting = this.hitTest(data.worldPosition) || this.rectHitTest(data.worldRect);
+        if (isIntersecting) {
+            this.isBeingOperated = true;
+            this.usingToolType = data.toolType;
         }else{
-            data.tool.hideAnimation();
+            this.isBeingOperated = false;
+            this.usingToolType = RepairToolType.无;
         }
-        // console.warn("零件", this.node.name, "工具类型:", RepairToolType[data.toolType], "是否相交:", this.isIntersectingTool)
     }
 
     /** 矩形命中测试：polygon vs rect */

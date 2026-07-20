@@ -257,10 +257,9 @@ export class Mobile extends Component {
 
     public getActiveTooledPart(): PartBase | null {
         const parts = this.isFront ? this.frontParts : this.backParts;
-        for (const part of parts) {
-            if (part && part.isValid && part.isIntersectingTool) {
-                return part;
-            }
+        for(let i = 0; i < parts.length; i++){
+            const part = parts[i];
+            if (part && part.isValid && part.isBeingOperated) return part;
         }
         return null;
     }
