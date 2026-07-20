@@ -1,0 +1,115 @@
+CCEffect %{
+techniques:
+  - passes:
+      - vert: vs:vert
+        frag: fs:frag
+        blendState:
+          targets:
+            - blend: true
+              blendSrc: src_alpha #源颜色（片元着色器输出的颜色）混合因子使用源颜色的Alpha值
+              blendDst: one_minus_src_alpha #目标颜色（帧缓冲中的颜色）混合因子使用(（1 - 源颜色的Alpha值)
+        depthStencilState:
+          depthTest: false #关闭深度测试
+          depthWrite: false #关闭深度写入
+        rasterizerState:
+          cullMode: none
+        properties:
+          __metadata__: { editor: { visible: false } }
+          texSize: { value: [100, 100] }
+          center: { value: [0, 0] }
+          size: { value: [100, 100] }
+          type: { value: 0 }
+          contourTexture: { value: white }
+          feather: { value: 0 }
+          inverted: { value: 0 }
+          scale: { value: 0 }
+          enable: { value: 1 }
+          sampleFromRt: { value: 0 }
+
+}%
+
+CCProgram vs %{
+precision mediump float;
+#include <cc-global>
+#if USE_LOCAL
+  #include <builtin/uniforms/cc-local>
+#endif
+in vec3 a_position;
+in vec2 a_texCoord;
+in vec4 a_color;
+out vec4 spriteColor;
+out vec2 uv;
+out float v_sampleFromRt;
+uniform Vs {
+  float sampleFromRt;
+};
+vec4 vert() {
+  vec4 pos = vec4(a_position, 1); //扩展齐次坐标的w分量，便于后续计算
+  #if USE_LOCAL
+    pos = cc_matWorld * pos;
+  #endif
+  #if USE_PIXEL_ALIGNMENT
+    pos = cc_matView * pos;
+    pos.xyz = floor(pos.xyz);
+    pos = cc_matProj * pos;
+  #else
+    pos = cc_matViewProj * pos;
+  #endif
+  uv = a_texCoord;
+  v_sampleFromRt = sampleFromRt;
+  if (sampleFromRt == 1.0 && cc_cameraPos.w > 1.0) {
+    uv.y = 1.0 - uv.y;
+  }
+  spriteColor = a_color;
+  return pos;
+}
+}%
+
+CCProgram fs %{
+precision mediump float;
+#include <sprite-texture>
+in vec4 spriteColor;
+in vec2 uv;
+in float v_sampleFromRt;
+uniform Fs {
+  vec2 texSize;
+  vec2 center;
+  vec2 size;
+  float type;
+  float feather;
+  float inverted;
+  float scale;
+  float enable;
+};
+uniform sampler2D contourTexture;
+vec4 getColor(sampler2D tex, vec2 uv) {
+  return uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0 ? vec4(0, 0, 0, 0) : texture(tex, uv);
+}
+#define ALPHA_THRESHOLD 0.2
+vec4 frag() {
+  vec4 o = getColor(cc_spriteTexture, uv) * spriteColor;
+  if (enable == 0.0)return o;
+  if (o.a < ALPHA_THRESHOLD)discard;
+  vec2 halfSize = size * 0.5;
+  vec2 pixelPos = vec2(uv.x - 0.5, mix(0.5 - uv.y, uv.y - 0.5, v_sampleFromRt)) * texSize - center;
+  float alpha;
+  if (type == 0.0) {
+    float fx = feather / halfSize.x, fy = feather / halfSize.y;
+    vec2 coord = 1.0 - abs(pixelPos) / halfSize;
+    alpha = min(smoothstep(-fx, fx, coord.x), smoothstep(-fy, fy, coord.y));
+  } else if (type == 1.0) {
+    float dist = length(feather / halfSize);
+    alpha = smoothstep(-dist, dist, 1.0 - length(pixelPos / halfSize));
+  } else {
+    vec2 contourUV = (pixelPos + halfSize) / size;
+    contourUV.y = 1.0 - contourUV.y;
+    alpha = step(ALPHA_THRESHOLD, getColor(contourTexture, contourUV).a);
+  }
+  if (inverted == 1.0 && alpha > 0.5) {
+    vec2 holeCenterUV = vec2(0.5 + center.x / texSize.x, 0.5 - center.y / texSize.y);
+    o = getColor(cc_spriteTexture, holeCenterUV + (uv - holeCenterUV) / scale) * spriteColor;
+  }
+  o.a *= mix(1.0 - alpha, alpha, inverted);
+  return o;
+}
+}%
