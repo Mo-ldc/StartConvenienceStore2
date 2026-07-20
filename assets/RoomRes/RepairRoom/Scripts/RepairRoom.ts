@@ -388,7 +388,7 @@ export class RepairRoom extends BaseRoom {
             if (this.usingTool.isStepComplete) {
                 this.usingTool.hideAnimation();
             } else {
-                this.usingTool.showAnimation();
+                this.usingTool.showAnimation(activePart.node.worldPosition);
             }
         } else {
             this.usingTool.hideAnimation();

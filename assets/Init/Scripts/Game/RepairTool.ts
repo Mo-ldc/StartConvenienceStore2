@@ -55,10 +55,12 @@ export class RepairTool extends Component {
             .start();
     }
     /** 显示动画 */
-    public showAnimation(){
-        // console.log('显示动画');
+    public showAnimation(worldPosition?: Vec3){
         if (this.animationNode) {
             this.animationNode.active = true;
+            if (worldPosition) {
+                this.animationNode.setWorldPosition(worldPosition);
+            }
         }
     }
     /** 隐藏动画 */
@@ -66,6 +68,7 @@ export class RepairTool extends Component {
         // console.log('隐藏动画');
         if (this.animationNode) {
             this.animationNode.active = false;
+            
         }
     }
 
