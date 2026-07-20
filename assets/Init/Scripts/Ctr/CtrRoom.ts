@@ -1,4 +1,4 @@
-import { _decorator, Component, EventTouch, instantiate, Node, Prefab, v3, Vec3 } from 'cc';
+import { _decorator, Color, Graphics, instantiate, Node, Prefab, tween, Tween, UIOpacity, UITransform, Vec3, view } from 'cc';
 import { CtrBase } from './CtrBase';
 import { BaseRoom } from '../Game/BaseRoom';
 import { CtrMgr } from '../Mgr/CtrMgr';
@@ -28,12 +28,32 @@ export class CtrRoom extends CtrBase  {
     @property({ type: RepairRoom , tooltip: '修复房间' })
     public repairRoom: RepairRoom = null;
 
+    /** 过渡遮罩（可选，不设置则自动创建） */
+    @property({ type: Node, tooltip: '过渡遮罩' })
+    public transitionMask: Node = null;
+    private isTransitioning: boolean = false;
+
 
     init(){
         console.log("初始化 房间 数据：");
         this.lobbyRoom.init();
         this.partsRoom.init();
         this.repairRoom.init();
+        this.createTransitionMask();
+    }
+
+    private createTransitionMask(): void {
+        if (this.transitionMask) return;
+        this.transitionMask = new Node('TransitionMask');
+        this.transitionMask.parent = this.roomRoot;
+        const uiTransform = this.transitionMask.addComponent(UITransform);
+        const visibleSize = view.getVisibleSize();
+        uiTransform.setContentSize(visibleSize.width, visibleSize.height);
+        const graphics = this.transitionMask.addComponent(Graphics);
+        graphics.fillColor = new Color(0, 0, 0, 255);
+        graphics.rect(-visibleSize.width / 2, -visibleSize.height / 2, visibleSize.width, visibleSize.height);
+        graphics.fill();
+        this.transitionMask.active = false;
     }
 
 
@@ -79,41 +99,71 @@ export class CtrRoom extends CtrBase  {
 
 
     private changeRoom(roomEnum: RoomEnum): void {
-        // console.log("切换房间: " + roomEnum);
+        if (this.isTransitioning) return;
+        this.isTransitioning = true;
+
         if(this.repairRoom){
             this.repairRoom.partBtnRoot.active = false;
             this.repairRoom.partBtnRoot.x = this.repairRoom.listInitX;
         }
+
+        this.showTransitionMask(() => {
+            this.executeRoomSwitch(roomEnum);
+            this.hideTransitionMask(() => {
+                this.isTransitioning = false;
+            });
+        });
+    }
+
+    private showTransitionMask(onComplete?: () => void): void {
+        if (!this.transitionMask) { onComplete?.(); return; }
+        this.transitionMask.active = true;
+        let op = this.transitionMask.getComponent(UIOpacity);
+        if (!op) op = this.transitionMask.addComponent(UIOpacity);
+        op.opacity = 0;
+        tween(op).to(0.15, { opacity: 255 }).call(() => onComplete?.()).start();
+    }
+
+    private hideTransitionMask(onComplete?: () => void): void {
+        if (!this.transitionMask) { onComplete?.(); return; }
+        let op = this.transitionMask.getComponent(UIOpacity);
+        if (!op) { this.transitionMask.active = false; onComplete?.(); return; }
+        tween(op).to(0.15, { opacity: 0 }).call(() => {
+            this.transitionMask.active = false;
+            onComplete?.();
+        }).start();
+    }
+
+    private executeRoomSwitch(roomEnum: RoomEnum): void {
         switch (roomEnum) {
             case RoomEnum.LobbyRoom:
+                this.lobbyRoom.node.setSiblingIndex(this.roomRoot.children.length - 1);
+                if (this.transitionMask) this.transitionMask.setSiblingIndex(this.roomRoot.children.length - 1);
                 this.lobbyRoom.showRoom();
                 this.repairRoom.hideRoom();
                 this.partsRoom.hideRoom();
-                /** 显示选房间的UI */
-                // MessMgr.emit(GameEvent.RoomUIActive, true);
 
                 let mobile = this.repairRoom.repairMobile;
                 if(mobile){
                     let data = mobile.getRepairHint();
                     if(data && data.action == "complete"){
-                        //
                         this.lobbyRoom.showCompleteMobile(mobile.node);
                     }
                 }
-               
                 break;
             case RoomEnum.PartsRoom:
+                this.partsRoom.node.setSiblingIndex(this.roomRoot.children.length - 1);
+                if (this.transitionMask) this.transitionMask.setSiblingIndex(this.roomRoot.children.length - 1);
                 this.partsRoom.showRoom();
                 this.lobbyRoom.showRoom();
                 this.repairRoom.hideRoom();
                 break;
             case RoomEnum.RepairRoom:
+                this.repairRoom.node.setSiblingIndex(this.roomRoot.children.length - 1);
+                if (this.transitionMask) this.transitionMask.setSiblingIndex(this.roomRoot.children.length - 1);
                 this.repairRoom.showRoom();
                 this.lobbyRoom.hideRoom();
                 this.partsRoom.hideRoom();
-
-                /** 隐藏选房间的UI */
-                // MessMgr.emit(GameEvent.RoomUIActive, false);
                 break;
             default:
                 break;

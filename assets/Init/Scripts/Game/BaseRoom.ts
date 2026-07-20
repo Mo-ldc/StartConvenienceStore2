@@ -1,4 +1,4 @@
-import { _decorator, Component, Enum, EventTouch, Label, Node, tween, Vec3 } from 'cc';
+import { _decorator, Component, Enum, EventTouch, Label, Node, tween, Tween, Vec3 } from 'cc';
 import { RoomEnum } from '../Data/Enum/RoomEnum';
 import { GameData } from '../Data/Data/GameData';
 import { MessMgr } from '../Mgr/MessMgr';
@@ -26,7 +26,7 @@ export class BaseRoom extends Component {
     @property({ tooltip: '隐藏位置' })
     private hidePosition: Vec3 = new Vec3(0, 0, 0);
 
-    private switchRoomTime: number = 0.2;
+    protected switchRoomTime: number = 0.2;
 
     /** 金币文本 */
     @property({ type: Label, tooltip: '金币文本' })
@@ -76,16 +76,18 @@ export class BaseRoom extends Component {
         this.updateGoldLabel();
     }
     /** 显示房间 */
-    showRoom(){
-        tween(this.node)
-            .to(this.switchRoomTime, { position: this.showPosition })
-            .start();
+    showRoom(onComplete?: () => void){
+        Tween.stopAllByTarget(this.node);
+        const tw = tween(this.node).to(this.switchRoomTime, { position: this.showPosition });
+        if (onComplete) tw.call(onComplete);
+        tw.start();
     }
     /** 隐藏房间 */
-    hideRoom(){
-        tween(this.node)
-            .to(this.switchRoomTime, { position: this.hidePosition })
-            .start();
+    hideRoom(onComplete?: () => void){
+        Tween.stopAllByTarget(this.node);
+        const tw = tween(this.node).to(this.switchRoomTime, { position: this.hidePosition });
+        if (onComplete) tw.call(onComplete);
+        tw.start();
     }
     protected onTouchStart(event: EventTouch) {
         // console.log("触摸开始:", this.node.name)

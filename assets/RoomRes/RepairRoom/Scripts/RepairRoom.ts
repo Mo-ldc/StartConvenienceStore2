@@ -385,13 +385,17 @@ export class RepairRoom extends BaseRoom {
         this.usingTool.isIntersectingPart = activePart != null;
 
         if (this.usingTool.isIntersectingPart) {
+
             if (this.usingTool.isStepComplete) {
                 this.usingTool.hideAnimation();
+                this.dragShow.getComponent(Sprite).enabled = true;
             } else {
                 this.usingTool.showAnimation(activePart.node.worldPosition);
+                this.dragShow.getComponent(Sprite).enabled = false;
             }
         } else {
             this.usingTool.hideAnimation();
+            this.dragShow.getComponent(Sprite).enabled = true;
         }
     }
     public onTouchEnd(event: EventTouch) {
