@@ -5,6 +5,8 @@ import { PartSide } from '../../Data/Enum/Enum';
 import { MessMgr } from '../../Mgr/MessMgr';
 import { GameEvent } from '../../Data/Enum/GameEvent';
 import { Mobile } from '../Mobile';
+import { RepairTool } from '../RepairTool';
+import { GlowOutline } from '../../../Shader/GlowOutline/GlowOutline';
 const { ccclass, property } = _decorator;
 /** 工具作用配置 */
 @ccclass('PartToolSet')
@@ -81,7 +83,7 @@ export class PartBase extends Component {
         this.initLocalPos = this.node.position.clone();
         this.sprite = this.ani.getComponent(Sprite);
         this.polygon = this.node.getComponent(PolygonCollider2D);
-        // this.glowOut = this.ani.getComponent(GlowOutline);
+        this.glowOut = this.ani.getComponent(GlowOutline);
         this.initShader();
         this.registerEvent();
     }
@@ -120,15 +122,15 @@ export class PartBase extends Component {
         this.node.off(Node.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
     }
     protected initShader() {
-        // if (this.glowOut) {
-        //     this.glowOut.outlineWidth = this.outlineWidth;
-        //     this.glowOut.innerWidth = this.innerWidth;
-        //     // this.glowOut.outlineColor = this.outlineColor.clone();
+        if (this.glowOut) {
+            this.glowOut.outlineWidth = this.outlineWidth;
+            this.glowOut.innerWidth = this.innerWidth;
+            // this.glowOut.outlineColor = this.outlineColor.clone();
 
-        //     this.hideGlowOut();
-        // }else{
-        //     console.log("GlowOutline component not found on node:", this.node.name);
-        // }
+            this.hideGlowOut();
+        }else{
+            console.log("GlowOutline component not found on node:", this.node.name);
+        }
     }
 
     /** 被盖住的配件 */
@@ -171,14 +173,14 @@ export class PartBase extends Component {
     /** 多边形碰撞组件  */
     private polygon: PolygonCollider2D = null; // 多边形碰撞组件  */
 
-    // @property({ displayName: '描边颜色' })
+    @property({ displayName: '描边颜色' })
     outlineColor: Color = new Color(255, 0, 0, 255);
-    // @property({ displayName: '外描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向透明区域扩展(UV单位)' })
+    @property({ displayName: '外描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向透明区域扩展(UV单位)' })
     outlineWidth: number = 0.0;
-    // @property({ displayName: '内描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向像素内部侵蚀(UV单位)' })
+    @property({ displayName: '内描边宽度', slide: true, range: [0.0, 0.1, 0.001], tooltip: '向像素内部侵蚀(UV单位)' })
     innerWidth: number = 0.003;
     /** 外发光组件 */
-    // private glowOut:GlowOutline = null;
+    private glowOut:GlowOutline = null;
 
     /** 当前阶段的工具数组 */
     public get currentToolArr(): PartToolSet[] {
@@ -373,18 +375,18 @@ export class PartBase extends Component {
 
     /** 隐藏外发光 */
     public hideGlowOut(): void {
-        // if (this.glowOut) {
-        //     this.glowOut.outlineWidth = 0;
-        //     this.glowOut.innerWidth = 0;
-        // }else{
-        //     // console.error("glowOut is null:", this.node.name);
-        // }
+        if (this.glowOut) {
+            this.glowOut.outlineWidth = 0;
+            this.glowOut.innerWidth = 0;
+        }else{
+            // console.error("glowOut is null:", this.node.name);
+        }
     }
     public showGlowOut(): void {
-        // if (this.glowOut) {
-        //     this.glowOut.innerWidth = this.innerWidth;
-        //     this.glowOut.outlineWidth = this.outlineWidth;
-        // }
+        if (this.glowOut) {
+            this.glowOut.innerWidth = this.innerWidth;
+            this.glowOut.outlineWidth = this.outlineWidth;
+        }
     }
 
     public setOpacity(opacity: number, setNode?: Node): void {
@@ -419,19 +421,23 @@ export class PartBase extends Component {
         this.isIntersectingTool = false;
         this.currentAppliedTool = RepairToolType.无;
     }
-    protected onCheckToolPartIntersection(data: { worldPosition: Vec2, worldRect: Rect, toolType: RepairToolType }): void {
+    /** 检测工具与零件是否相交 */
+    protected onCheckToolPartIntersection(data: { worldPosition: Vec2, worldRect: Rect, tool:RepairTool }): void {
         if (!this.isOnPhone() || this.isCovered) {
             this.isIntersectingTool = false;
             return;
         }
-        if (this.getCurrentRequiredTool() !== data.toolType) {
-            // console.warn("工具类型不匹配：", this.node.name, "需要:", RepairToolType[this.getCurrentRequiredTool()], "有:", RepairToolType[data.toolType]);
+        if (this.getCurrentRequiredTool() !== data.tool.toolType) {
+            // console.warn("工具类型不匹配：", this.node.name, "需要:", RepairToolType[this.getCurrentRequiredTool()], "有:", RepairToolType[data.tool.toolType]);
             this.isIntersectingTool = false;
             return;
         }
         this.isIntersectingTool = this.hitTest(data.worldPosition) || this.rectHitTest(data.worldRect);
         if (this.isIntersectingTool) {
-            this.currentAppliedTool = data.toolType;
+            this.currentAppliedTool = data.tool.toolType;
+            data.tool.showAnimation();
+        }else{
+            data.tool.hideAnimation();
         }
         // console.warn("零件", this.node.name, "工具类型:", RepairToolType[data.toolType], "是否相交:", this.isIntersectingTool)
     }

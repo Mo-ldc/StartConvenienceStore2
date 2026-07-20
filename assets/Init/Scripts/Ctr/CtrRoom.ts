@@ -153,6 +153,7 @@ export class CtrRoom extends CtrBase  {
         }
         const mobile = instantiate(prefab);
         room?.addMobile(mobile, mobileKey);
+        console.log(room.node.name + " 创建手机: " + mobileKey);
     }
     private jumpToPartShop(partKey: string): void {
         if(!this.partsRoom){

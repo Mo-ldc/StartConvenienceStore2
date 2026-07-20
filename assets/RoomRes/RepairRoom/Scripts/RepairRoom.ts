@@ -367,12 +367,13 @@ export class RepairRoom extends BaseRoom {
         MessMgr.emit(GameEvent.CheckToolPartIntersection, {
             worldPosition: worldPos,
             worldRect: dragRect,
-            toolType: this.currentSelectedTool.toolType,
+            tool: this.currentSelectedTool,
         });
     }
     public onTouchEnd(event: EventTouch) {
         const tool = this.currentSelectedTool;
         if(tool){
+            tool.hideAnimation();
             tool.backToInitPosition();
             this.dragShow.spriteFrame = null;
             this.currentSelectedTool = null;
@@ -381,6 +382,10 @@ export class RepairRoom extends BaseRoom {
         }
     }
     public addMobile(mobile: Node, mobileKey: string): void {
+        if(!mobile){
+            console.error("手机为空:", mobileKey);
+            return;
+        }
         this.mobile = mobile;
         mobile.parent = this.workbench;
         mobile.active = false;
