@@ -98,6 +98,7 @@ export class CtrRoom extends CtrBase  {
                     if(data && data.action == "complete"){
                         //
                         this.lobbyRoom.showCompleteMobile(mobile.node);
+                        this.repairRoom.clearWorkbench();
                     }
                 }
                

@@ -485,13 +485,22 @@ export class RepairRoom extends BaseRoom {
         }
     }
 
-    /** 订单完成 → 回收完好零件，清空工作台 */
+    /** 订单完成 → 清空工作台 */
     private onOrderCompleted(): void {
+        this.clearWorkbench();
+    }
+
+    /** 清理工作台：回收完好零件 + 清空 */
+    public clearWorkbench(): void {
+        if (!this.repairMobile) {
+            this.workbench.destroyAllChildren();
+            return;
+        }
         const children = this.workbench.children.slice();
         for (const child of children) {
             const part = child.getComponent(PartBase);
             if (!part || part.isFault) continue;
-            const quality = this.repairMobile?.mobileInfo?.quality;
+            const quality = this.repairMobile.mobileInfo?.quality;
             if (quality == null) continue;
             const shopKey = ShopConfig.getShopKeyByPart(part.partType, quality, part.isReal);
             if (!shopKey) continue;
