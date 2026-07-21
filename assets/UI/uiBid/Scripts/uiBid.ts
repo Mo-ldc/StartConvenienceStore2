@@ -3,6 +3,7 @@ import { BaseUI } from 'db://assets/Init/Scripts/UI/Base/BaseUI';
 import { MessMgr } from 'db://assets/Init/Scripts/Mgr/MessMgr';
 import { GameEvent } from 'db://assets/Init/Scripts/Data/Enum/GameEvent';
 import { BtnNum } from './BtnNum';
+import { AudioMgr, AudioName } from 'db://assets/Init/Scripts/Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
 
 @ccclass('uiBid')
@@ -44,6 +45,7 @@ export class uiBid extends BaseUI {
 
     /** 按钮输入 */
     private onButtonInput(btn: BtnNum) {
+        AudioMgr.PlaySound(AudioName.BtnClick);
         let custom = btn.node.name;
         console.log("按钮输入:", custom);
         if (custom === "c") {

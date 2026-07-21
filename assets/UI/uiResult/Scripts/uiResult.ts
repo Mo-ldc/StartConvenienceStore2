@@ -40,7 +40,7 @@ export class uiResult extends BaseUI {
         this.initText();
         const ctrLoan = CtrMgr.getInstance().ctrLoan;
         const repayTotal = ctrLoan ? ctrLoan.getTodayRepayTotal() : 0;
-        let 利润 = GameData.TodayExpend - GameData.TodayIncome - GameData.PayRent;
+        let 利润 = GameData.TodayIncome - GameData.TodayExpend - repayTotal - GameData.PayRent;
 
         let 剩余金额 = GameData.PlayerCoin - GameData.PayRent;
         let showData = [

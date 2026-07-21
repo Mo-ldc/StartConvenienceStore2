@@ -460,7 +460,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 639,
-      "height": 489
+      "height": 800
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -499,9 +499,9 @@
       "__uuid__": "b5b00f4b-26ea-40f6-9beb-c87e35049d13@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
-    "_type": 0,
+    "_type": 1,
     "_fillType": 0,
-    "_sizeMode": 1,
+    "_sizeMode": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -527,8 +527,6 @@
       "__id__": 0
     },
     "fileId": "7aTnrG2mVLCreBug+J+zvR",
-    "instance": null,
-    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -555,7 +553,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 168.51999999999998,
+      "y": 326.108,
       "z": 0
     },
     "_lrot": {
@@ -714,7 +712,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0.1139999999999759,
-      "y": -37.602000000000004,
+      "y": -39.60900000000001,
       "z": 0
     },
     "_lrot": {
@@ -755,7 +753,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 570.816,
-      "height": 328.144
+      "height": 632.324
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -793,7 +791,7 @@
     "_string": "接待顾客\n1、点击手机可显示详细信息\n2、估算合适的价格进行报价\n\n维修说明\n电池：使用烙铁拆卸和安装\n手机壳：使用热风枪拆卸和安装\n手机膜：使用铲子拆卸和安装\n屏幕：使用吸盘拆卸，使用热风枪安装\n镜头：使用镊子拆卸和安装\n主板：点击螺丝\n\n注：手机零件需要使用相对应的品质",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 18,
+    "_actualFontSize": 31,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
