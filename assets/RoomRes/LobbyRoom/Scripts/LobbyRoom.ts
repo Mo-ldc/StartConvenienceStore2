@@ -142,7 +142,7 @@ export class LobbyRoom extends BaseRoom {
         this.initNumShow(order);
         // console.log("初始化订单:", order);
 
-        WordAni.PlayWordAni(this.rentLabel, GameData.PayRent);
+       
 
         this.role.showRole(() => {
             this.orderNode.active = true;
@@ -152,17 +152,17 @@ export class LobbyRoom extends BaseRoom {
                     if (order.demandDialogue.talkKey){
                         AudioMgr.PlaySound(order.demandDialogue.talkKey);
                     }
+                    this.priceLabel.string = "0";
+                    this.profitLabel.string = "0";
+                    this.rentLabel.string = "0";
                     this.scheduleOnce(() => {
                         MessMgr.emit(GameEvent.RoomCreateMobile, order.mobileKey, this);
-                    }, 2);
-                    if (this.priceLabel) {
                         this.priceNode && (this.priceNode.active = true);
                         WordAni.PlayWordAni(this.priceLabel, order.orderPriceReference);
-                    }
-                    if (this.profitLabel) {
-                        let profit = order.orderPriceReference;
-                        WordAni.PlayWordAni(this.profitLabel, profit);
-                    }
+                        WordAni.PlayWordAni(this.profitLabel, order.orderPriceReference);
+                        WordAni.PlayWordAni(this.rentLabel, GameData.PayRent);
+                    }, 2);
+         
                     this._pendingShowButtons = true;
                     this._damageTableVisible = false;
                     let partPrice =  ShopConfig.getRealPartPrice(order.partType, order.quality);

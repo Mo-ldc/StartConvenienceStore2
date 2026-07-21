@@ -40,6 +40,10 @@ export class ShopItem extends Component {
     /** 目标背景色 */
     private static readonly TARGET_COLOR: string = "#a2ffafff";
 
+    /** 被选中后显示的节点 */
+    @property({ type: Node, tooltip: '被选中后显示的节点' })
+    selectedArr: Node[] = [];
+
     @property({ type: ShopItemSprSet, tooltip: '零件图片设置' })
     sprSetArr: ShopItemSprSet[] = [];
 
@@ -105,10 +109,16 @@ export class ShopItem extends Component {
 
     /** 设置是否为目标商品：目标显示红色背景，否则显示普通色 */
     setTarget(isTarget: boolean): void {
-        if (!this.bg) return;
-        const color = new Color();
-        Color.fromHEX(color, isTarget ? ShopItem.TARGET_COLOR : ShopItem.NORMAL_COLOR);
-        this.bg.color = color;
+        // if (!this.bg) return;
+        // const color = new Color();
+        // Color.fromHEX(color, isTarget ? ShopItem.TARGET_COLOR : ShopItem.NORMAL_COLOR);
+        // this.bg.color = color;
+        for (let i = 0; i < this.selectedArr.length; i++) {
+            const node = this.selectedArr[i];
+            if (node) {
+                node.active = isTarget;
+            }
+        }
     }
 
 
