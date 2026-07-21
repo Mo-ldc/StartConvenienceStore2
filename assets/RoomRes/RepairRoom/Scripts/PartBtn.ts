@@ -14,6 +14,11 @@ export class PartBtn extends Component {
     /** 数量文本 */
     @property({ type: Label, tooltip: '数量文本' })
     public numLabel: Label = null;
+    
+    /** 选中节点 */
+    @property({ type: Node, tooltip: '选中节点' })
+    public selectedNode: Node = null;
+    
     /** 零件键值 */
     partKey: string = '';
     /** 零件品质 */
@@ -32,6 +37,8 @@ export class PartBtn extends Component {
         }
         return false;
     }
+
+
 }
 
 

@@ -195,6 +195,26 @@ export class PartsRoom extends BaseRoom {
         return this.highlightTargetItem(shopKey);
     }
 
+    /** 把对应的类型显示为选中状态 */
+    public showPartType(partType: string): void {
+        this.updateBtnSelect(partType);
+    }
+
+    /** 根据零件类型查找对应的配置列表 */
+    private findListByPartType(partType: string): ShopListConfigData[] | null {
+        const groups = [ShopConfig.shopPartList, ShopConfig.shopGoodsList];
+        for (let g = 0; g < groups.length; g++) {
+            const list = groups[g];
+            for (let i = 0; i < list.length; i++) {
+                const category = list[i];
+                if (category.shopListName === partType) {
+                    return list;
+                }
+            }
+        }
+        return null;
+    }
+
     /** 在配件和商品配置中查找商品Key所属的类型列表与种类 */
     private findCategoryByShopKey(shopKey: string): { list: ShopListConfigData[]; category: ShopListConfigData } | null {
         const groups = [ShopConfig.shopPartList, ShopConfig.shopGoodsList];

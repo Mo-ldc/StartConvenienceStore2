@@ -265,6 +265,14 @@ export class PartBase extends Component {
         return !this.isTouchMobile(mobileNode);
     }
 
+    /** 检测手指松开位置是否在手机本体上 */
+    private isFingerOnMobile(event: EventTouch): boolean {
+        const mobileTransform = this.mobileNode.getComponent(UITransform);
+        if (!mobileTransform) return false;
+        const pos = event.getUILocation();
+        return mobileTransform.getBoundingBoxToWorld().contains(pos);
+    }
+
     /** 设置配件故障状态，自动切换故障图/完好图 */
     public setFault(fault: boolean): void {
         this.isFault = fault;
@@ -532,7 +540,7 @@ export class PartBase extends Component {
         this._isDragging = false;
         this.onRelease();
 
-        if (this.mobileNode && this.isTouchMobile(this.mobileNode)) {
+        if (this.mobileNode && this.isFingerOnMobile(event)) {
             if (this.mobileComp && !this.mobileComp.canPlacePart(this)) {
                 console.warn(this.node.name, " 同类型零件已在手机上，无法放入");
                 return;

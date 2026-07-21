@@ -1747,7 +1747,7 @@
         "__expectedType__": "cc.SpriteFrame"
       },
       {
-        "__uuid__": "5417f4a2-5dc9-4725-8e9f-c0dc638947de@f9941",
+        "__uuid__": "5aa380f6-0b8a-4395-82cf-b097423fdcea@f9941",
         "__expectedType__": "cc.SpriteFrame"
       },
       {
@@ -5287,7 +5287,7 @@
       "__id__": 16
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 226

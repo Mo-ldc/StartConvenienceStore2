@@ -18,7 +18,7 @@ export class RoleConfig {
         { roleKey: "roleSpr_1", roleName: "角色1", sex: Gender.女 },
         { roleKey: "roleSpr_2", roleName: "角色2", sex: Gender.男 },
         { roleKey: "roleSpr_3", roleName: "角色3", sex: Gender.男 },
-        { roleKey: "roleSpr_4", roleName: "角色4", sex: Gender.男 },
+        // { roleKey: "roleSpr_4", roleName: "角色4", sex: Gender.男 },
         { roleKey: "roleSpr_5", roleName: "角色5", sex: Gender.女 },
     ];
 
