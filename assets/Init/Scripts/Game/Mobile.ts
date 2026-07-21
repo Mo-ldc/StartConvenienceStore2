@@ -287,9 +287,16 @@ export class Mobile extends Component {
         const side = damagedPart.partSide;
         const allParts = side === PartSide.正面 ? [...this.frontParts] : [...this.backParts];
         const damagedLayer = damagedPart.layer;
-        const newPart = this.partSlotMap.get(damagedType);
         const damagedRemoved = !damagedPart.isOnPhone();
-        const newPlaced = newPart && newPart !== damagedPart && newPart.isOnPhone();
+
+        let foundNewPart: PartBase = null;
+        for (const part of allParts) {
+            if (part !== damagedPart && part.partType === damagedType && !part.isFault && part.isOnPhone()) {
+                foundNewPart = part;
+                break;
+            }
+        }
+        const newPlaced = foundNewPart != null;
 
         const hintPart = (part: PartBase, verb: string): { action: string, partType: PartType, toolType: RepairToolType, message: string } => {
             // 主板特例：螺丝而非工具
