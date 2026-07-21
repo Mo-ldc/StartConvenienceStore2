@@ -291,7 +291,7 @@ export class GameData
     static get IsPenalty(): boolean {
         return DataMgr.getInstance().getItem('IsPenalty') === true;
     }
-    static set IsPenalty(value: boolean): void {
+    static set IsPenalty(value: boolean) {
         DataMgr.getInstance().setItem('IsPenalty', value);
     }
 
@@ -299,7 +299,7 @@ export class GameData
     static get PenaltyAmount(): number {
         return DataMgr.getInstance().getItem('PenaltyAmount') || 0;
     }
-    static set PenaltyAmount(value: number): void {
+    static set PenaltyAmount(value: number){
         DataMgr.getInstance().setItem('PenaltyAmount', value);
     }
 }

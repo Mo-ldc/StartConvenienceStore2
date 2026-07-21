@@ -498,7 +498,7 @@ export class PartBase extends Component {
             console.warn(this.node.name, " 不在触摸范围内")
             return;
         }
-
+        AudioMgr.PlaySound(AudioName.PickPart);
         this._isDragging = true;
         event.propagationStopped = true;
         this.onPress();

@@ -59,6 +59,31 @@ export enum AudioName {
     BtnClick3 = "btn3",
     /** 点击切换模块 */
     BtnClick4 = "btn4",
+
+
+    /** 点击1 */
+    OnClick1 = "on_click_1",
+    /** 点击2 */
+    OnClick2 = "on_click_2",
+    /** 点击3 */
+    OnClick3 = "on_click_3",
+    /** 点击4 */
+    OnClick4 = "on_click_4",
+    /** 点击5 */
+    OnClick5 = "on_click_5",
+    
+    /** 点击6 */
+    OnClick6 = "on_click_6",
+    /** 点击7 */
+    OnClick7 = "on_click_7",
+    /** 点击8 */
+    OnClick8 = "on_click_8",
+    /** 点击9 */
+    OnClick9 = "on_click_9",
+    /** 点击0 */
+    OnClick0 = "on_click_0",
+    /** 点击归零 */
+    OnClickReset = "on_click_reset",
 };
 Enum(AudioName)
 const { ccclass, property } = _decorator;

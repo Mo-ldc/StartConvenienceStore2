@@ -2629,7 +2629,7 @@
     "node": {
       "__id__": 109
     },
-    "_enabled": true,
+    "_enabled": false,
     "__prefab": {
       "__id__": 113
     },
@@ -2724,8 +2724,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 183,
-      "height": 429
+      "width": 167,
+      "height": 315
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2746,7 +2746,7 @@
     "node": {
       "__id__": 108
     },
-    "_enabled": false,
+    "_enabled": true,
     "__prefab": {
       "__id__": 120
     },
@@ -2766,7 +2766,7 @@
     },
     "_type": 0,
     "_fillType": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 1,
     "_fillCenter": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -2870,13 +2870,23 @@
     "_points": [
       {
         "__type__": "cc.Vec2",
-        "x": -46.57185628742515,
-        "y": 214.5
+        "x": 80.9,
+        "y": 153.7
       },
       {
         "__type__": "cc.Vec2",
-        "x": -44.38023952095808,
-        "y": 213.13809523809527
+        "x": -82.2,
+        "y": 157.1
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -82.7,
+        "y": -156.4
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 85.3,
+        "y": -154.2
       }
     ],
     "_id": ""
@@ -2894,8 +2904,6 @@
       "__id__": 0
     },
     "fileId": "61v/ycutxAppugLZdpRVI8",
-    "instance": null,
-    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -3036,7 +3044,7 @@
         "__id__": 156
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 178

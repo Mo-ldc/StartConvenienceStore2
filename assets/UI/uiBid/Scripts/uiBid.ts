@@ -45,7 +45,9 @@ export class uiBid extends BaseUI {
 
     /** 按钮输入 */
     private onButtonInput(btn: BtnNum) {
-        AudioMgr.PlaySound(AudioName.BtnClick);
+        if(btn.clickAudio !== AudioName.None){
+            AudioMgr.PlaySound(btn.clickAudio);
+        }
         let custom = btn.node.name;
         console.log("按钮输入:", custom);
         if (custom === "c") {

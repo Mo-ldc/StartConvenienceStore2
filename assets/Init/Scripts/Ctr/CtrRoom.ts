@@ -172,8 +172,9 @@ export class CtrRoom extends CtrBase  {
         if (!this.repairRoom) return;
         if (this.repairRoom.toGeneratePartType != PartType.无) {
             this.repairRoom.onJumpBack();
+            MessMgr.emit(GameEvent.ChangeRoom, RoomEnum.RepairRoom);
         }
-        MessMgr.emit(GameEvent.ChangeRoom, RoomEnum.RepairRoom);
+
     }
 }
 

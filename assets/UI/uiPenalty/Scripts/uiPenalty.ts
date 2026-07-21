@@ -19,7 +19,7 @@ export class uiPenalty extends BaseUI {
             WordAni.PlayWordAni(this.penaltyLabel, amount);
         }
     }
-
+    /** 点击认罚 */
     onClickConfirm() {
         const amount = GameData.PenaltyAmount;
         GameData.PlayerCoin -= amount;
@@ -33,7 +33,7 @@ export class uiPenalty extends BaseUI {
             MessMgr.emit(GameEvent.PenaltyResolved);
         }
     }
-
+    /** 点击免于处罚 */
     onClickExempt() {
         PlatForm.getInstance().Ui_Ad_GetReward(() => {
             GameData.IsPenalty = false;

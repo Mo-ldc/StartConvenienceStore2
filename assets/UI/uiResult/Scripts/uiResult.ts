@@ -42,7 +42,7 @@ export class uiResult extends BaseUI {
         const repayTotal = ctrLoan ? ctrLoan.getTodayRepayTotal() : 0;
         let 利润 = GameData.TodayIncome - GameData.TodayExpend - repayTotal - GameData.PayRent;
 
-        let 剩余金额 = GameData.PlayerCoin - GameData.PayRent;
+        let 剩余金额 = GameData.PlayerCoin - repayTotal - GameData.PayRent;
         let showData = [
             { label: this.todayExpend, str: GameData.TodayExpend },
             { label: this.todayIncome, str: GameData.TodayIncome },

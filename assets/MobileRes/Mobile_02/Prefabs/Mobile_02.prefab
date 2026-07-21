@@ -451,7 +451,6 @@
       "__id__": 17
     },
     "partType": 2,
-    "isNeedFixed": true,
     "ani": {
       "__id__": 4
     },
@@ -1260,7 +1259,6 @@
       "__id__": 62
     },
     "partType": 4,
-    "isNeedFixed": true,
     "ani": {
       "__id__": 25
     },
@@ -1805,7 +1803,6 @@
       "__id__": 82
     },
     "partType": 3,
-    "isNeedFixed": false,
     "ani": {
       "__id__": 69
     },
@@ -2251,7 +2248,6 @@
       "__id__": 101
     },
     "partType": 5,
-    "isNeedFixed": true,
     "ani": {
       "__id__": 88
     },
@@ -2770,7 +2766,6 @@
       "__id__": 122
     },
     "partType": 1,
-    "isNeedFixed": true,
     "ani": {
       "__id__": 109
     },
@@ -3556,7 +3551,6 @@
       "__id__": 151
     },
     "partType": 6,
-    "isNeedFixed": true,
     "ani": {
       "__id__": 138
     },
@@ -4050,7 +4044,6 @@
       "__id__": 172
     },
     "partType": 7,
-    "isNeedFixed": true,
     "ani": {
       "__id__": 159
     },

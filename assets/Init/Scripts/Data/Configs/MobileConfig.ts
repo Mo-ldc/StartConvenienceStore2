@@ -19,6 +19,7 @@ export class MobileConfig {
         { mobileKey: "Mobile_03", mobileName: "小米17", mobileResKey: "Mobile_03", quality: Quality.高 },
         { mobileKey: "Mobile_04", mobileName: "荣耀600", mobileResKey: "Mobile_04", quality: Quality.中 },
         { mobileKey: "Mobile_05", mobileName: "三折叠", mobileResKey: "Mobile_05", quality: Quality.高 },
+        { mobileKey: "Mobile_06", mobileName: "翻盖诺基亚", mobileResKey: "Mobile_06", quality: Quality.低 },
     ];
 }
 

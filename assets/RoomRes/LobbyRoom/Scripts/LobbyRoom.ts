@@ -160,13 +160,15 @@ export class LobbyRoom extends BaseRoom {
                     this.priceLabel.string = "0";
                     this.profitLabel.string = "0";
                     this.rentLabel.string = "0";
+                  
+                    MessMgr.emit(GameEvent.RoomCreateMobile, order.mobileKey, this);
                     this.scheduleOnce(() => {
-                        MessMgr.emit(GameEvent.RoomCreateMobile, order.mobileKey, this);
                         this.priceNode && (this.priceNode.active = true);
                         WordAni.PlayWordAni(this.priceLabel, order.orderPriceReference);
                         WordAni.PlayWordAni(this.profitLabel, order.orderPriceReference);
                         WordAni.PlayWordAni(this.rentLabel, GameData.PayRent);
-                    }, 2);
+                    }, 1)
+
          
                     this._pendingShowButtons = true;
                     this._damageTableVisible = false;
