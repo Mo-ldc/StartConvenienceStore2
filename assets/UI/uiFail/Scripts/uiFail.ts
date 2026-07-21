@@ -26,6 +26,9 @@ export class uiFail extends BaseUI {
             GameData.PlayerCoin = GameSetting.PlayerCoin;
             GameData.PlayerOrderNum = 0;
             GameData.PlayerLoan = 0;
+            GameData.TodayIncome = 0;
+            GameData.TodayExpend = 0;
+            GameData.TodayLoan = 0;
             for (const tier of LoanConfig.loanTiers) {
                 GameData.clearLoanRecord(tier.loanKey);
             }
@@ -45,6 +48,9 @@ export class uiFail extends BaseUI {
         GameData.PlayerOrderNum = 0;
         GameData.PayRent = 0;
         GameData.IsDaySettlement = false;
+        GameData.TodayIncome = 0;
+        GameData.TodayExpend = 0;
+        GameData.TodayLoan = 0;
 
         for (const tier of LoanConfig.loanTiers) {
             GameData.clearLoanRecord(tier.loanKey);

@@ -134,15 +134,15 @@ export class ShopConfig{
         { shopListName: "音响", shopListData: ShopConfig.speaker },
         { shopListName: "其他", shopListData: ShopConfig.other }
     ];
-    /** 获取零件价格
+    /** 获取正品零件价格
      * 
       */
-    public static getPartPrice(part: PartType, quality: Quality): number {
+    public static getRealPartPrice(part: PartType, quality: Quality): number {
         let price = 0;
         this.shopPartList.forEach(element => {
-            if (element.partType == part) {
+            if (element.partType == part && element.shopListData) {
                 element.shopListData.forEach(element2 => {
-                    if (element2.quality == quality) {
+                    if (element2.quality == quality && element2.isReal) {
                         price = element2.shopPrice;
                     }
                 });

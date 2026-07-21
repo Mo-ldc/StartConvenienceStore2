@@ -13,6 +13,7 @@ import { Mobile } from 'db://assets/Init/Scripts/Game/Mobile';
 import { ShopConfig } from 'db://assets/Init/Scripts/Data/Configs/ShopConfig';
 import { Quality } from 'db://assets/Init/Scripts/Data/Enum/Enum';
 import { GameData } from 'db://assets/Init/Scripts/Data/Data/GameData';
+import { CtrMgr } from 'db://assets/Init/Scripts/Mgr/CtrMgr';
 const { ccclass, property } = _decorator;
 
 @ccclass('LobbyRoom')
@@ -81,6 +82,9 @@ export class LobbyRoom extends BaseRoom {
     /** 利润文本 */
     @property(Label)
     profitLabel: Label = null;
+    /** 成本文本 */
+    @property(Label)
+    contentLabel: Label = null;
 
     /** 订单数据 */
     private order: OrderModel = null;
@@ -130,31 +134,39 @@ export class LobbyRoom extends BaseRoom {
 
         WordAni.PlayWordAni(this.rentLabel, GameData.PayRent);
 
-        MessMgr.emit(GameEvent.RoomCreateMobile, order.mobileKey, this);
-        this.roleEnter(() => {
+        this.role.showRole(() => {
+            this.orderNode.active = true;
             tween(this.orderNode)
                 .to(0.3, { scale: new Vec3(1, 1, 1) })
+                .call(() => {
+                    if (order.demandDialogue.talkKey){
+                        AudioMgr.PlaySound(order.demandDialogue.talkKey);
+                    }
+                    this.scheduleOnce(() => {
+                        MessMgr.emit(GameEvent.RoomCreateMobile, order.mobileKey, this);
+                    }, 2);
+                    if (this.priceLabel) {
+                        this.priceNode && (this.priceNode.active = true);
+                        WordAni.PlayWordAni(this.priceLabel, order.orderPriceReference);
+                    }
+                    if (this.profitLabel) {
+                        let profit = order.orderPriceReference;
+                        WordAni.PlayWordAni(this.profitLabel, profit);
+                    }
+                    this.showBut();
+                    this.updateDamageTable(order.partType, order.quality);
+                    let partPrice =  ShopConfig.getRealPartPrice(order.partType, order.quality);
+                    WordAni.PlayWordAni(this.contentLabel, partPrice);
+                })
                 .start();
-            this.showNumShow(() => {
-                if (this.priceLabel) {
-                    this.priceNode && (this.priceNode.active = true);
-                    WordAni.PlayWordAni(this.priceLabel, order.orderPriceReference);
-                }
-                if(this.profitLabel){
-                    let profit = order.orderPriceReference;
-                    WordAni.PlayWordAni(this.profitLabel, profit);
-                }
-                this.showBut();
-                this.updateDamageTable(order.partType, order.quality);
-            });
-            this.orderNode.active = true;
+                this.showNumShow();
         });
     }
 
     /** 跟新毁坏评估表 */
     private updateDamageTable(part: PartType, quality: Quality): void {
         /** 零件商品价格 */
-        let partPrice =  ShopConfig.getPartPrice(part, quality);
+        let partPrice =  ShopConfig.getRealPartPrice(part, quality);
 
         this.damageTable.active = true;
         const arr = this.damageTable.children;
@@ -217,10 +229,7 @@ export class LobbyRoom extends BaseRoom {
             .start();
     }
 
-    /** 角色进入 */
-    private roleEnter(callback?: Function): void {
-        this.role.showRole(callback);
-    }
+
 
     /** 初始化订单信息 */
     private initOrderInfo(order: OrderModel,roleName:string): void {
@@ -349,6 +358,7 @@ export class LobbyRoom extends BaseRoom {
         // 1. 播放金币飞行动画
        
         GameData.PlayerCoin += this.order.orderPriceDecided;
+        CtrMgr.getInstance().ctrLv?.addIncome(this.order.orderPriceDecided);
         AudioMgr.PlaySound(AudioName.ReceiveCoin);
         MessMgr.emit(GameEvent.UpdateGold);
         this.generateGold(this.role.node.worldPosition.clone(),20);

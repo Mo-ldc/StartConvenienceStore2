@@ -6,10 +6,10 @@ import { MessMgr } from '../Mgr/MessMgr';
 import { GameEvent } from '../Data/Enum/GameEvent';
 import { RoomEnum } from '../Data/Enum/RoomEnum';
 
-import { RoleConfig } from '../Data/Configs/RoleConfig';
 import { LobbyRoom } from 'db://assets/RoomRes/LobbyRoom/Scripts/LobbyRoom';
 import { PartsRoom } from 'db://assets/RoomRes/PartsRoom/Scripts/PartsRoom';
 import { RepairRoom } from 'db://assets/RoomRes/RepairRoom/Scripts/RepairRoom';
+import { PartType } from '../Data/Type/ObjType';
 const { ccclass, property } = _decorator;
 
 @ccclass('CtrRoom')
@@ -40,6 +40,7 @@ export class CtrRoom extends CtrBase  {
     registerEvent(): void {
         MessMgr.on(GameEvent.ChangeRoom, this.changeRoom, this);
         MessMgr.on(GameEvent.JumpToPartShop, this.jumpToPartShop, this);
+        MessMgr.on(GameEvent.JumpToRepairRoom, this.jumpToRepairRoom, this);
         MessMgr.on(GameEvent.RefreshRole, this.refreshRole, this);
         MessMgr.on(GameEvent.RoomCreateMobile, this.handleCreateMobile, this);
         MessMgr.on(GameEvent.MobileMoveToRepairRoom, this.mobileMoveToRepairRoom, this);
@@ -49,6 +50,8 @@ export class CtrRoom extends CtrBase  {
     removeEvent(): void {
         MessMgr.off(GameEvent.ChangeRoom, this.changeRoom, this);
         MessMgr.off(GameEvent.JumpToPartShop, this.jumpToPartShop, this);
+        MessMgr.off(GameEvent.JumpToRepairRoom, this.jumpToRepairRoom, this);
+        
         MessMgr.off(GameEvent.RefreshRole, this.refreshRole, this);
         MessMgr.off(GameEvent.RoomCreateMobile, this.handleCreateMobile, this);
         MessMgr.off(GameEvent.MobileMoveToRepairRoom, this.mobileMoveToRepairRoom, this);
@@ -80,7 +83,6 @@ export class CtrRoom extends CtrBase  {
         // console.log("切换房间: " + roomEnum);
         if(this.repairRoom){
             this.repairRoom.partBtnRoot.active = false;
-            this.repairRoom.partBtnRoot.x = this.repairRoom.listInitX;
         }
         switch (roomEnum) {
             case RoomEnum.LobbyRoom:
@@ -153,6 +155,7 @@ export class CtrRoom extends CtrBase  {
         room?.addMobile(mobile, mobileKey);
         console.log(room.node.name + " 创建手机: " + mobileKey);
     }
+    /** 跳转到零件商店 */
     private jumpToPartShop(partKey: string): void {
         if(!this.partsRoom){
             console.warn("零件商店不存在")
@@ -161,6 +164,19 @@ export class CtrRoom extends CtrBase  {
         this.partsRoom.showTargetShop(partKey);
 
         MessMgr.emit(GameEvent.ChangeRoom, RoomEnum.PartsRoom);
+    }
+
+    /** 跳转到维修界面且生成对应的零件 */
+    private jumpToRepairRoom(): void {
+        if (!this.repairRoom) {
+            console.warn("维修房间不存在")
+            return;
+        }
+        if (this.repairRoom.toGeneratePartType != PartType.无) {
+            this.repairRoom.onJumpBack();
+            MessMgr.emit(GameEvent.ChangeRoom, RoomEnum.RepairRoom);
+        }
+
     }
 }
 

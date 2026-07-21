@@ -313,7 +313,7 @@ export class PartBase extends Component {
      * @returns 本帧是否有步骤推进
      */
     public addToolTime(dt: number): boolean {
-        console.log("addToolTime:", this.node.name);
+        // console.log("addToolTime:", this.node.name);
         const arr = this.currentToolArr;
         if (this.currentToolIndex >= arr.length) return false;
         const step = arr[this.currentToolIndex];

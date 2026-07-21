@@ -112,6 +112,9 @@ export class CtrLv extends CtrBase {
         MessMgr.emit(GameEvent.RefreshRole);
         console.warn("开始新的一天:", GameData.GameDay);
         GameData.PlayerOrderNum = 0;
+        GameData.TodayIncome = 0;
+        GameData.TodayExpend = 0;
+        GameData.TodayLoan = 0;
     }
 
     /** 获取当前订单 */
@@ -174,6 +177,16 @@ export class CtrLv extends CtrBase {
     }
 
     //#endregion
+
+    /** 增加今日支出 */
+    public addExpend(amount: number): void {
+        GameData.TodayExpend += amount;
+    }
+
+    /** 增加今日收入 */
+    public addIncome(amount: number): void {
+        GameData.TodayIncome += amount;
+    }
 
     private randomRange(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;

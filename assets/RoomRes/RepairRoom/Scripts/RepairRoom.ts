@@ -94,11 +94,10 @@ export class RepairRoom extends BaseRoom {
     /** 零件种类列表 */
     @property({ type: Node, tooltip: '零件种类列表' })
     public  partTypeList: Node = null;
-    /** 列表初始X */
-    public  listInitX: number = 1200;
-    /** 显示X */
-    public  showX: number = 375;
-
+    /** 列表隐藏X */
+    public  listHideX: number = 1200;
+    /** 列表显示X */
+    public  listShowX: number = 355;
     private partBtnTypeList: PartListBtn[] = [];
 
     /**零件种类父节点 */
@@ -110,11 +109,18 @@ export class RepairRoom extends BaseRoom {
     @property({ type: Prefab, tooltip: '零件按钮预制体' })
     public  partBtnPrefab: Prefab = null;
 
+
+    /** 跳转生成零件 */
+    public toGeneratePartType: PartType = PartType.无;
+    public toGeneratePartKey: string = '';
+
     init(...args: any[]): void {
         super.init(...args);
         this.initToolQueue();
         this.initPartTypeList();
         this.partBtnRoot.active = false;
+        this.partBtnRoot.x = this.listHideX;
+        this.toGeneratePartType = PartType.无;
     }
 
     registerEvent(): void {
@@ -173,16 +179,12 @@ export class RepairRoom extends BaseRoom {
     /** 点击材料按钮 */
     private onClickPartTypeBtn(btn:PartListBtn, event: EventTouch) {
         AudioMgr.PlaySound(AudioName.BtnClick);
+        this.toGeneratePartType = PartType.无;
         const uiTouch = event.getUILocation();
         console.log("点击材料按钮", btn.node.name);
         Tween.stopAllByTarget(this.partBtnRoot);
         // this.partBtnRoot.x = this.listInitX;
         this.partBtnRoot.worldPositionY = uiTouch.y;
-        this.partBtnRoot.active = true;
-        tween(this.partBtnRoot)
-            .to(0.1, { x: this.listInitX })
-            .to(0.3, { x: this.showX })
-            .start();
         let data = ShopConfig.shopPartList.find((item) => item.partType == btn.partType);
         if(!data){
             console.log("没有这个零件 数据：", btn.partType);
@@ -255,7 +257,37 @@ export class RepairRoom extends BaseRoom {
         }else{
             this.partBtnRoot.active = false;
             MessMgr.emit(GameEvent.JumpToPartShop, btn.partKey);
+            this.toGeneratePartType = btn.partType;
+            this.toGeneratePartKey = btn.partKey;
         }
+    }
+    /** 跳转回来且生成对应的零件 */
+    onJumpBack(): void {
+        if (this.toGeneratePartType == PartType.无) {
+            console.warn("无需跳转")
+            return;
+        }
+
+        this.hidePartList();
+        const type = this.toGeneratePartType;
+        const key = this.toGeneratePartKey;
+        const saveData = GameData.getObjectStorageData(key);
+        if (!saveData) {
+            console.warn("没有这个零件 数据：", key);
+            return;
+        }
+        if (saveData.count > 0) {
+            const shopData = ShopConfig.shopPartList
+                .find(s => s.partType === type)?.shopListData
+                ?.find(d => d.shopKey === key);
+
+            this.spawnPart(type, shopData?.isReal ?? true);
+
+            saveData.count--;
+            GameData.setObjectStorageData(key, saveData);
+        }
+        this.toGeneratePartType = PartType.无;
+        this.toGeneratePartKey = '';
     }
 
     /** 生成零件到工作台：复制手机上对应类型零件，标记为完好 */
@@ -298,6 +330,8 @@ export class RepairRoom extends BaseRoom {
         if (!this.repairMobile) return;
         const hint = this.repairMobile.getRepairHint();
         if(!hint){
+            if(this.toolSpr) this.toolSpr.spriteFrame = null;
+            console.log("没有提示");
             return;
         }
         if (this.stepLabel) {
@@ -305,9 +339,10 @@ export class RepairRoom extends BaseRoom {
             
         }
         if(this.toolSpr){
+
             let tool = this.toolQueue.find(t => t.toolType === hint.toolType);
             if(tool){
-                this.toolSpr.spriteFrame = tool.dragShowSpriteFrame;
+                this.toolSpr.spriteFrame = tool.node.getComponent(Sprite).spriteFrame;
             }else{
                 this.toolSpr.spriteFrame = null;
             }
@@ -360,6 +395,7 @@ export class RepairRoom extends BaseRoom {
                 this.dragShow.getComponent(Sprite).enabled = true;
                 this.dragShow.node.setWorldPosition(tool.node.worldPosition);
                 MessMgr.emit(GameEvent.PickUpTool, tool.toolType);
+                this.hidePartList();
                 return;
             }
         }
@@ -368,6 +404,7 @@ export class RepairRoom extends BaseRoom {
             const btn = this.partBtnList[i];
             if (btn && btn.node.active && btn.checkClickPosition(event)) {
                 this.onClickPartListBtn(btn, event);
+                this.hidePartList();
                 return;
             }
         }
@@ -377,13 +414,11 @@ export class RepairRoom extends BaseRoom {
             const btn = this.partBtnTypeList[i];
             if (btn.checkClickPosition(event)) {
                 this.onClickPartTypeBtn(btn, event);
+                this.showPartList();
                 return;
             }
         }
-
-        tween(this.partBtnRoot)
-            .to(0.3, { x: this.listInitX })
-            .start();
+        this.hidePartList();
     }
     public onTouchMove(event: EventTouch) {
         if (!this.usingTool) return;
@@ -465,6 +500,23 @@ export class RepairRoom extends BaseRoom {
         this.mobile = null;
         if (this.stepLabel) this.stepLabel.string = '';
         if (this.faultLabel) this.faultLabel.string = '';
+    }
+    /** 显示零件列表 */
+    private showPartList(): void {
+        this.partBtnRoot.active = true;
+        tween(this.partBtnRoot)
+            .to(0.2, { x: this.listShowX })
+            .start();
+    }
+
+    /** 隐藏零件列表 */
+    private hidePartList(): void {
+        tween(this.partBtnRoot)
+            .to(0.2, { x: this.listHideX })
+            .call(() => {
+                this.partBtnRoot.active = false;
+            })
+            .start();
     }
 }
 

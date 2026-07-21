@@ -6,6 +6,7 @@ import { GameEvent } from 'db://assets/Init/Scripts/Data/Enum/GameEvent';
 import { PartType } from 'db://assets/Init/Scripts/Data/Type/ObjType';
 import { AudioMgr, AudioName } from 'db://assets/Init/Scripts/Mgr/AudioMgr';
 import { MessMgr } from 'db://assets/Init/Scripts/Mgr/MessMgr';
+import { CtrMgr } from 'db://assets/Init/Scripts/Mgr/CtrMgr';
 import { UIMgr } from 'db://assets/Init/Scripts/Mgr/UIMgr';
 const { ccclass, property } = _decorator;
 @ccclass('ShopItemSprSet')
@@ -35,9 +36,9 @@ class ShopItemSprSet{
 @ccclass('ShopItem')
 export class ShopItem extends Component {
     /** 普通背景色 */
-    private static readonly NORMAL_COLOR: string = "#ffffffff";
+    private static readonly NORMAL_COLOR: string = "#ffffff";
     /** 目标背景色 */
-    private static readonly TARGET_COLOR: string = "#ff6565ff";
+    private static readonly TARGET_COLOR: string = "#a2ffafff";
 
     @property({ type: ShopItemSprSet, tooltip: '零件图片设置' })
     sprSetArr: ShopItemSprSet[] = [];
@@ -140,12 +141,14 @@ export class ShopItem extends Component {
             return;
         }
         GameData.PlayerCoin -= this.shopData.shopPrice;
+        CtrMgr.getInstance().ctrLv?.addExpend(this.shopData.shopPrice);
         AudioMgr.PlaySound(AudioName.PayCoin);
 
         console.log("购买成功:", this.shopData.shopName);
         GameData.setObjectStorageData(this.objKey, { count: saveData.count + 1, isUnlocked: true });
         MessMgr.emit(GameEvent.UpdateObjectCount, this.objKey);
         MessMgr.emit(GameEvent.UpdateGold);
+        MessMgr.emit(GameEvent.JumpToRepairRoom);
     }
 
     /** 点击解锁 */

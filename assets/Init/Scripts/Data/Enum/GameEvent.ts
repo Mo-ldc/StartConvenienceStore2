@@ -8,6 +8,10 @@ export enum GameEvent {
 
     /** 房间UI激活 */
     RoomUIActive = "RoomUIActive",
+
+    /** 跳转到维修界面且生成对应的零件 */
+    JumpToRepairRoom = "JumpToRepairRoom",
+
     /** 更新金币 */
     UpdateGold = "UpdateGold",
     /** 更新贷款 */

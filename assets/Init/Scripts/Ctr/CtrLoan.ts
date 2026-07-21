@@ -104,6 +104,7 @@ export class CtrLoan extends CtrBase {
         // 到账 + 累计负债
         GameData.PlayerCoin += cfg.loanAmount;
         GameData.PlayerLoan += cfg.loanAmount;
+        GameData.TodayLoan += cfg.loanAmount;
         AudioMgr.PlaySound(AudioName.ReceiveCoin);
 
         // 标记已贷并缓存
@@ -134,6 +135,33 @@ export class CtrLoan extends CtrBase {
             if (this.getRecord(cfg.loanKey).hasLoaned) sum += cfg.loanAmount;
         }
         return sum;
+    }
+
+    /** 今日应还款总额（本金+利息） */
+    public getTodayRepayTotal(): number {
+        let sum = 0;
+        for (let i = 0; i < LoanConfig.loanTiers.length; i++) {
+            const cfg = LoanConfig.loanTiers[i];
+            if (this.getRecord(cfg.loanKey).hasLoaned) {
+                sum += cfg.loanAmount + Math.round(cfg.loanAmount * cfg.loanRate);
+            }
+        }
+        return sum;
+    }
+
+    /** 偿还今日贷款（本金+利息），扣除 PlayerCoin 并清零 TodayLoan */
+    public repayTodayLoan(): number {
+        const total = this.getTodayRepayTotal();
+        if (total <= 0) return 0;
+        GameData.PlayerCoin -= total;
+        GameData.PlayerLoan -= GameData.TodayLoan;
+        GameData.TodayLoan = 0;
+        for (let i = 0; i < LoanConfig.loanTiers.length; i++) {
+            const record = this.getRecord(LoanConfig.loanTiers[i].loanKey);
+            record.hasRepaid = true;
+            this.setRecord(LoanConfig.loanTiers[i].loanKey, record);
+        }
+        return total;
     }
 
     /** 当前总负债 */

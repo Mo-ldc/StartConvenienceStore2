@@ -55,7 +55,7 @@ export class PartMotherboard extends PartBase {
             screw.unscrew();
             let screw2 = this.findScrewedScrew();
             AudioMgr.PlaySound(AudioName.ToolScrew);
-            console.error("拧下螺丝", screw.node.name)
+            // console.error("拧下螺丝", screw.node.name)
             if(!screw2){
                 AudioMgr.PlaySound(AudioName.StepComplete);
                 this.isFixed = false;
@@ -115,7 +115,7 @@ export class PartMotherboard extends PartBase {
                 }
             }
         }
-        console.warn("放下:", RepairToolType[this.usingToolType]);
+        // console.warn("放下:", RepairToolType[this.usingToolType]);
         super.onPutDownTool();
     }
 

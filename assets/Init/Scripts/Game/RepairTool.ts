@@ -1,4 +1,4 @@
-import { _decorator, Component, Enum, EventTouch, Node, SpriteFrame, tween, UITransform, Vec3 } from 'cc';
+import { _decorator, Component, Enum, EventTouch, Node, SpriteFrame, tween, UIOpacity, UITransform, Vec3 } from 'cc';
 import { RepairToolType } from '../Data/Type/ObjType';
 import { AudioMgr, AudioName } from '../Mgr/AudioMgr';
 const { ccclass, property } = _decorator;
@@ -48,6 +48,7 @@ export class RepairTool extends Component {
         // console.log('拖拽的时候展示的');
         this.isIntersectingPart = false;
         this.isStepComplete = false;
+        this.setOpacity(255);
         // AudioMgr.PlaySound(AudioName.PickPart)
         tween(this.node)
             .to(0.2, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'bounceOut' })
@@ -57,6 +58,7 @@ export class RepairTool extends Component {
     /** 回归原位 */
     public backToInitPosition(){
         // console.log('回归原位');
+        this.setOpacity(255);
         tween(this.node)
             .to(0.2, { scale: new Vec3(1, 1, 1) })
             .start();
@@ -67,15 +69,24 @@ export class RepairTool extends Component {
     /** 显示动画 */
     public showAnimation(worldPosition?: Vec3){
         if (this.animationNode) {
+            this.setOpacity(0);
             this.animationNode.active = true;
             if (worldPosition) {
                 this.animationNode.setWorldPosition(worldPosition);
             }
         }
     }
+    public setOpacity(opacity: number){
+        let uiOP = this.node.getComponent(UIOpacity);
+        if(!uiOP){
+            uiOP = this.node.addComponent(UIOpacity);
+        }
+        uiOP.opacity = opacity;
+    }
     /** 隐藏动画 */
     public hideAnimation(){
         // console.log('隐藏动画');
+        this.setOpacity(255);
         if (this.animationNode) {
             this.animationNode.active = false;
         }

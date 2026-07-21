@@ -251,12 +251,39 @@ export class GameData
         DataMgr.getInstance().setItem( 'PayRent', value );
     }
     //#endregion
-    /** 是否进入天数结算 */
+    /** 是否进入交房租阶段 */
     static get IsDaySettlement(){
         const val = DataMgr.getInstance().getItem( 'IsDaySettlement' );
         return val != null ? val : false;
     }
     static set IsDaySettlement ( value: boolean ){
         DataMgr.getInstance().setItem( 'IsDaySettlement', value );
+    }
+
+    /** 今日收入 */
+    static get TodayIncome(){
+        const val = DataMgr.getInstance().getItem( 'TodayIncome' );
+        return val != null ? val : 0;
+    }
+    static set TodayIncome ( value: number ){
+        DataMgr.getInstance().setItem( 'TodayIncome', value );
+    }
+
+    /** 今日支出 */
+    static get TodayExpend(){
+        const val = DataMgr.getInstance().getItem( 'TodayExpend' );
+        return val != null ? val : 0;
+    }
+    static set TodayExpend ( value: number ){
+        DataMgr.getInstance().setItem( 'TodayExpend', value );
+    }
+
+    /** 今日贷款 */
+    static get TodayLoan(){
+        const val = DataMgr.getInstance().getItem( 'TodayLoan' );
+        return val != null ? val : 0;
+    }
+    static set TodayLoan ( value: number ){
+        DataMgr.getInstance().setItem( 'TodayLoan', value );
     }
 }

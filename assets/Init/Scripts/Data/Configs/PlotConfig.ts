@@ -26,7 +26,7 @@ export class PlotConfig {
         ],
         [PartType.电池]: [
             { talkKey: "tb_dc_1", talkContent: "师傅，我这手机电池已经进入养老模式了，充两小时，精神五分钟", sex: Gender.男 },
-            { talkKey: "tb_dc_2", talkContent: "手机电池充电慢，是不是电池坏了", sex: Gender.男 },
+            { talkKey: "tb_dc_2", talkContent: "这手机一离开充电器就没有安全感，麻烦给它治治", sex: Gender.男 },
             { talkKey: "tb_dc_3", talkContent: "帮我看看电池吧，它现在一天要充八次，比我喝水还勤快", sex: Gender.男 },
 
             { talkKey: "tg_dc_1", talkContent: "师傅救救它吧，现在电量掉得比我工资还快", sex: Gender.女 },
@@ -50,11 +50,11 @@ export class PlotConfig {
         ],
         [PartType.屏幕膜]: [
             { talkKey: "tb_sj_1", talkContent: "麻烦换张膜，我看消息都得先绕开三条裂缝", sex: Gender.男 },
-            { talkKey: "tb_sj_1", talkContent: "膜里面全是气泡，按一下跑一个，已经可以当解压玩具了", sex: Gender.男 },
-            { talkKey: "tb_sj_1", talkContent: "这膜摸起来跟搓衣板似的，再不换我指纹都要磨没了", sex: Gender.男},
+            { talkKey: "tb_sj_2", talkContent: "膜里面全是气泡，按一下跑一个，已经可以当解压玩具了", sex: Gender.男 },
+            { talkKey: "tb_sj_3", talkContent: "这膜摸起来跟搓衣板似的，再不换我指纹都要磨没了", sex: Gender.男},
 
             { talkKey: "tg_sj_1", talkContent: "膜碎成这样还能坚持不掉，多少有点敬业过头了", sex: Gender.女},
-            { talkKey: "tg_sj_1", talkContent: "师傅，给它换张新的吧", sex: Gender.女},
+            { talkKey: "tg_sj_2", talkContent: "师傅，给它换张新的吧", sex: Gender.女},
         ],
         [PartType.SIM卡]: [
             { talkKey: "tb_sim_1", talkContent: "麻烦看看，它现在既没信号，也没态度，主打一个沉默", sex: Gender.男 },

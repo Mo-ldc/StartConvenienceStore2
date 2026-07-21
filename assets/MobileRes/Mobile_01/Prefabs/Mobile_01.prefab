@@ -1665,11 +1665,11 @@
       "__id__": 67
     },
     "faultSprite": {
-      "__uuid__": "4d93636b-ecb7-44a2-b49a-1025b23f27f8@f9941",
+      "__uuid__": "7208ba28-7918-4559-818c-5eaaacc49482@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "normalSprite": {
-      "__uuid__": "21c72541-1ba2-4aaf-b487-27406ce0d874@f9941",
+      "__uuid__": "4d93636b-ecb7-44a2-b49a-1025b23f27f8@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "unfixToolArr": [],
