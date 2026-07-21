@@ -19,6 +19,18 @@ class PartToolSet{
     useTime: number = 0;
 }
 
+/** 配置图设置 */
+@ccclass('PartSpriteSet')
+class PartSpriteSet {
+    @property({ type: SpriteFrame, displayName: '完好正版图' })
+    normalRealSpr: SpriteFrame = null;
+    @property({ type: SpriteFrame, displayName: '完好盗版图' })
+    dirtyFakeSpr: SpriteFrame = null;
+
+    @property({ type: SpriteFrame, displayName: '故障图' })
+    faultSprite: SpriteFrame = null;
+
+}
 
 @ccclass('PartBase')
 export class PartBase extends Component {
@@ -36,10 +48,6 @@ export class PartBase extends Component {
     @property({ type: Enum(PartType), tooltip: '配件类型' })
     public partType: PartType = PartType.无;
 
-    /** 零件是否需要固定 */
-    @property({ tooltip: '零件是否需要固定' })
-    public isNeedFixed: boolean = false;
-    
     /** 配件是否故障 */
     public isFault: boolean = false;
     /** 图片精灵组件 */
@@ -48,13 +56,11 @@ export class PartBase extends Component {
     @property({ type: Node, tooltip: '图片节点' })
     public ani: Node = null;
 
-    /** 故障图 */
-    @property({ type: SpriteFrame, tooltip: '故障图' })
-    public faultSprite: SpriteFrame = null;
-    
-    /** 完好图 */
-    @property({ type: SpriteFrame, tooltip: '完好图' })
-    public normalSprite: SpriteFrame = null;
+    @property({ type: PartSpriteSet, tooltip: '图集' })
+    public partSpriteSet: PartSpriteSet = null;
+
+    /** 零件真假 */
+    public isReal: boolean = true;
 
     /** 原来的父节点（手机正面/背面），归位时用 */
     public originalParent: Node = null;
@@ -146,7 +152,7 @@ export class PartBase extends Component {
     public isCovered: boolean = true;
 
     /** 是否固定 */
-    public isFixed: boolean = true;
+    public isFixed: boolean = false;
 
     /** 解除固定需要的步骤*/
     @property({type:PartToolSet, tooltip: '解除固定需要的步骤'})
@@ -197,7 +203,7 @@ export class PartBase extends Component {
         if (this.fixToolArr.length > 0 && this.fixToolArr[0].useTool !== RepairToolType.无) {
             this.needsFix = true;
         }
-        if (this.unfixToolArr.length > 0 && this.unfixToolArr[0].useTool !== RepairToolType.无) {
+        if (this.unfixToolArr.length > 0 && this.unfixToolArr[0].useTool !== RepairToolType.无 && this.needsFix) {
             this.isFixed = true;
         } else {
             this.isFixed = false;
@@ -273,8 +279,9 @@ export class PartBase extends Component {
             }
         }
         if (this.sprite) {
-            let spriteFrame = fault ? this.faultSprite : this.normalSprite;
-            this.sprite.spriteFrame = spriteFrame;
+            let data = this.partSpriteSet;
+            let spr = fault ? data.faultSprite : this.isReal ? data.normalRealSpr : data.dirtyFakeSpr;
+            this.sprite.spriteFrame = spr;
             // console.log("setFault:", this.node.name, "fault:", fault, " spriteFrame:", spriteFrame.name);
         }else{
             console.warn("图片组件未找到：", this.node.name)
@@ -545,8 +552,6 @@ export class PartBase extends Component {
                     MessMgr.emit(GameEvent.PartPlacedOnPhone, this);
                     if (this.needsFix) {
                         this.startFixPhase();
-                    } else {
-                        this.isFixed = true;
                     }
                 })
                 .start();

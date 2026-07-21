@@ -151,6 +151,16 @@ export class ShopConfig{
         return price;
     }
 
+    /** 根据零件类型+品质+真假查找 shopKey */
+    public static getShopKeyByPart(partType: PartType, quality: Quality, isReal: boolean): string | null {
+        for (const list of this.shopPartList) {
+            if (list.partType !== partType) continue;
+            const match = list.shopListData.find(d => d.quality === quality && d.isReal === isReal);
+            if (match) return match.shopKey;
+        }
+        return null;
+    }
+
 }
 
 

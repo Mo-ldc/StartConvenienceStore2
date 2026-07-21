@@ -110,6 +110,7 @@ export class Mobile extends Component {
         AudioMgr.PlaySound(AudioName.MobileFlip);
         this.front.active = this.isFront;
         this.back.active = !this.isFront;
+        MessMgr.emit(GameEvent.MobileFlipped, this.node);
     }
 
     public setDamagedPart(partType: PartType): void {
@@ -160,6 +161,9 @@ export class Mobile extends Component {
     protected update(dt: number): void {
         this.clickTime -= dt;
         if (this.clickTime <= 0) {
+            if (this.clickCount === 1) {
+                MessMgr.emit(GameEvent.MobileClicked, this.node);
+            }
             this.clickTime = 0;
             this.clickCount = 0;
         }

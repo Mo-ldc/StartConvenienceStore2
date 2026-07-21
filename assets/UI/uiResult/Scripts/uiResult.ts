@@ -74,6 +74,7 @@ export class uiResult extends BaseUI {
         if (this.todayRepay) this.todayRepay.string = "0";
         if (this.todayProfit) this.todayProfit.string = "0";
         if (this.openDay) this.openDay.string = "开店第" + GameData.GameDay + "天:";
+        if (this.todayRent) this.todayRent.string = "0";
         if (this.remainAmount) this.remainAmount.string = "0";
         if (this.resultNode) this.resultNode.active = false;
         if (this.cantPayNode) this.cantPayNode.active = false;

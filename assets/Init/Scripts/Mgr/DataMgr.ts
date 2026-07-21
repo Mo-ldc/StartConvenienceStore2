@@ -10,7 +10,7 @@ export class DataMgr {
     public static DeleteAll() {
         localStorage.clear();
     }
-    dataName: string = "WordWarData";
+    dataName: string = "ConventionData";
     data: any;
   
 

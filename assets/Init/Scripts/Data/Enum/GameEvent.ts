@@ -71,5 +71,9 @@ export enum GameEvent {
     NpcBidResult = "NpcBidResult",
     /** 金币飞行动画 */
     GoldFly = "GoldFly",
+    /** 手机被单击 */
+    MobileClicked = "MobileClicked",
+    /** 手机翻面 */
+    MobileFlipped = "MobileFlipped",
 }
 Enum(GameEvent);

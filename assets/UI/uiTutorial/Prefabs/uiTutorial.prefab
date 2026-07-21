@@ -790,10 +790,10 @@
       "b": 21,
       "a": 255
     },
-    "_string": "1、\n2、\n3、\n4、\n5、",
+    "_string": "接待顾客\n1、点击手机可显示详细信息\n2、估算合适的价格进行报价\n\n维修说明\n电池：使用烙铁拆卸和安装\n手机壳：使用热风枪拆卸和安装\n手机膜：使用铲子拆卸和安装\n屏幕：使用吸盘拆卸，使用热风枪安装\n镜头：使用镊子拆卸和安装\n主板：点击螺丝\n\n注：手机零件需要使用相对应的品质",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 31,
+    "_actualFontSize": 18,
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,

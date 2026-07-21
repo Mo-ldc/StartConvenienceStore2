@@ -88,17 +88,27 @@ export class LobbyRoom extends BaseRoom {
 
     /** 订单数据 */
     private order: OrderModel = null;
+    /** 是否等待手机动画完成后显示按钮 */
+    private _pendingShowButtons: boolean = false;
+    /** 损坏评估表是否可见 */
+    private _damageTableVisible: boolean = false;
     public getOrder(): OrderModel {return this.order;}
     registerEvent(): void {
         super.registerEvent();
         MessMgr.on(GameEvent.UpdatePriceLabel, this.updatePriceLabel, this);
         MessMgr.on(GameEvent.NpcBidResult, this.onNpcBidResult, this);
+        MessMgr.on(GameEvent.MobileClicked, this.onMobileClicked, this);
+        MessMgr.on(GameEvent.MobileFlipped, this.onMobileFlipped, this);
+        MessMgr.on(GameEvent.ChangeRoom, this.onChangeRoomHideDamage, this);
     }
 
     resetEvent(): void {
         super.resetEvent();
         MessMgr.off(GameEvent.UpdatePriceLabel, this.updatePriceLabel, this);
         MessMgr.off(GameEvent.NpcBidResult, this.onNpcBidResult, this);
+        MessMgr.off(GameEvent.MobileClicked, this.onMobileClicked, this);
+        MessMgr.off(GameEvent.MobileFlipped, this.onMobileFlipped, this);
+        MessMgr.off(GameEvent.ChangeRoom, this.onChangeRoomHideDamage, this);
     }
 
     init(...args: any[]): void {
@@ -153,8 +163,8 @@ export class LobbyRoom extends BaseRoom {
                         let profit = order.orderPriceReference;
                         WordAni.PlayWordAni(this.profitLabel, profit);
                     }
-                    this.showBut();
-                    this.updateDamageTable(order.partType, order.quality);
+                    this._pendingShowButtons = true;
+                    this._damageTableVisible = false;
                     let partPrice =  ShopConfig.getRealPartPrice(order.partType, order.quality);
                     WordAni.PlayWordAni(this.contentLabel, partPrice);
                 })
@@ -196,16 +206,57 @@ export class LobbyRoom extends BaseRoom {
         }
 
         tween(this.damageTable)
-            .to(0.3, { scale: new Vec3(1, 1, 1) })
-            .call(() => {
-
-            })
+            .to(0.2, { scale: new Vec3(1.15, 1.15, 1) })
+            .to(0.15, { scale: new Vec3(0.95, 0.95, 1) })
+            .to(0.12, { scale: new Vec3(1, 1, 1) })
             .start();
     }
     /** 显示完成的手机 */
     public showCompleteMobile(mobile: Node): void {
         this.addMobile(mobile, false);
         this.dealButton && (this.dealButton.active = true);
+    }
+
+    /** 手机被单击（仅在本房间时响应） */
+    private onMobileClicked(mobileNode: Node): void {
+        if (!mobileNode || !this.mobileAni) return;
+        if (mobileNode.parent !== this.mobileAni) return;
+        this.toggleDamageTable();
+    }
+
+    /** 切换损坏评估表显示/隐藏 */
+    private toggleDamageTable(): void {
+        if (!this.order) return;
+        if (this._damageTableVisible) {
+            tween(this.damageTable)
+                .to(0.3, { scale: new Vec3(0, 0, 1) })
+                .start();
+            this._damageTableVisible = false;
+        } else {
+            this.updateDamageTable(this.order.partType, this.order.quality);
+            this._damageTableVisible = true;
+        }
+    }
+
+    /** 手机翻面时隐藏损坏评估表 */
+    private onMobileFlipped(mobileNode: Node): void {
+        if (!mobileNode || !this.mobileAni) return;
+        if (mobileNode.parent !== this.mobileAni) return;
+        this.hideDamageTable();
+    }
+
+    /** 切换房间时隐藏损坏评估表 */
+    private onChangeRoomHideDamage(): void {
+        this.hideDamageTable();
+    }
+
+    /** 隐藏损坏评估表（不触发toggle） */
+    private hideDamageTable(): void {
+        if (!this._damageTableVisible) return;
+        this._damageTableVisible = false;
+        tween(this.damageTable)
+            .to(0.1, { scale: new Vec3(0, 0, 1) })
+            .start();
     }
 
     addMobile(mobile: Node, markDamaged: boolean = false): void {
@@ -226,6 +277,12 @@ export class LobbyRoom extends BaseRoom {
             .start();
         tween(op)
             .to(0.5, { opacity: 255 })
+            .call(() => {
+                if (this._pendingShowButtons) {
+                    this._pendingShowButtons = false;
+                    this.showBut();
+                }
+            })
             .start();
     }
 
@@ -293,6 +350,7 @@ export class LobbyRoom extends BaseRoom {
                 this.hideBut();
                 this.priceNode && (this.priceNode.active = false);
                 this.numShow.active = false;
+                this._damageTableVisible = false;
                 this.mobileAni.destroyAllChildren();
                 WordAni.PlayWordAni(this.profitLabel, 0);
                 tween(this.damageTable)
@@ -365,6 +423,7 @@ export class LobbyRoom extends BaseRoom {
 
         // 3. 隐藏成交按钮
         this.dealButton && (this.dealButton.active = false);
+        this._damageTableVisible = false;
 
         // 4. 移除手机，通知维修室清空工作台
         this.mobileAni.destroyAllChildren();
@@ -394,6 +453,7 @@ export class LobbyRoom extends BaseRoom {
         this.hideBut();
         this.priceNode && (this.priceNode.active = false);
         this.numShow.active = false;
+        this._damageTableVisible = false;
         this.mobileAni.destroyAllChildren();
         WordAni.PlayWordAni(this.profitLabel, 0);
         tween(this.damageTable)

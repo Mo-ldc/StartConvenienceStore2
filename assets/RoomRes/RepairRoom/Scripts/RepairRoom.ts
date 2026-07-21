@@ -315,6 +315,7 @@ export class RepairRoom extends BaseRoom {
         newPart.isCovered = false;
         newPart.isFixed = false;
         newPart.isGenuine = isGenuine;
+        newPart.isReal = isGenuine;
         newPart.isMobileOpen = true;
         newPart.setMobileRef(this.repairMobile.node, this.workbench, this.repairMobile);
 
@@ -493,8 +494,21 @@ export class RepairRoom extends BaseRoom {
         }
     }
 
-    /** 订单完成 → 清空工作台 */
+    /** 订单完成 → 回收完好零件，清空工作台 */
     private onOrderCompleted(): void {
+        const children = this.workbench.children.slice();
+        for (const child of children) {
+            const part = child.getComponent(PartBase);
+            if (!part || part.isFault) continue;
+            const quality = this.repairMobile?.mobileInfo?.quality;
+            if (quality == null) continue;
+            const shopKey = ShopConfig.getShopKeyByPart(part.partType, quality, part.isReal);
+            if (!shopKey) continue;
+            const saveData = GameData.getObjectStorageData(shopKey);
+            saveData.count += 1;
+            GameData.setObjectStorageData(shopKey, saveData);
+            console.log("回收零件:", shopKey, "数量:", saveData.count);
+        }
         this.workbench.destroyAllChildren();
         this.repairMobile = null;
         this.mobile = null;
