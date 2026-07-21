@@ -121,6 +121,10 @@ export class Game extends Component {
             // 进入交房租阶段
             console.log("进入交房租阶段");
             UIMgr.getInstance().showDialog(UIName.uiPayRent);
+        } else if (GameData.IsPenalty) {
+            // 进入处罚状态
+            console.log("进入处罚状态");
+            UIMgr.getInstance().showDialog(UIName.uiPenalty);
         } else {
             console.log("进入结算判断阶段");
             MessMgr.emit(GameEvent.SettlementJudge);

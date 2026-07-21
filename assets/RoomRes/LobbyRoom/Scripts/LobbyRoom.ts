@@ -100,6 +100,7 @@ export class LobbyRoom extends BaseRoom {
         MessMgr.on(GameEvent.MobileClicked, this.onMobileClicked, this);
         MessMgr.on(GameEvent.MobileFlipped, this.onMobileFlipped, this);
         MessMgr.on(GameEvent.ChangeRoom, this.onChangeRoomHideDamage, this);
+        MessMgr.on(GameEvent.PenaltyResolved, this.onPenaltyResolved, this);
     }
 
     resetEvent(): void {
@@ -109,6 +110,7 @@ export class LobbyRoom extends BaseRoom {
         MessMgr.off(GameEvent.MobileClicked, this.onMobileClicked, this);
         MessMgr.off(GameEvent.MobileFlipped, this.onMobileFlipped, this);
         MessMgr.off(GameEvent.ChangeRoom, this.onChangeRoomHideDamage, this);
+        MessMgr.off(GameEvent.PenaltyResolved, this.onPenaltyResolved, this);
     }
 
     init(...args: any[]): void {
@@ -414,6 +416,61 @@ export class LobbyRoom extends BaseRoom {
     onClickDeal(): void {
         AudioMgr.PlaySound(AudioName.BtnClick2);
         if (!this.order) return;
+
+        if (this.checkFakeDetected()) {
+            this.hideBut();
+            const penaltyAmount = this.order.orderPriceDecided * 2;
+            GameData.IsPenalty = true;
+            GameData.PenaltyAmount = penaltyAmount;
+            UIMgr.getInstance().showDialog(UIName.uiPenalty);
+            return;
+        }
+
+        this.doCompleteOrder();
+    }
+
+    /** 检查NPC是否发现假货 */
+    private checkFakeDetected(): boolean {
+        const mobileComp = this.mobile?.getComponent(Mobile);
+        if (!mobileComp || !this.order) return false;
+        if (this.order.knowledge <= 0) return false;
+
+        let hasFakePart = false;
+        for (const part of mobileComp.frontParts) {
+            if (!part.isFault && part.isOnPhone() && !part.isReal) {
+                hasFakePart = true;
+                break;
+            }
+        }
+        if (!hasFakePart) {
+            for (const part of mobileComp.backParts) {
+                if (!part.isFault && part.isOnPhone() && !part.isReal) {
+                    hasFakePart = true;
+                    break;
+                }
+            }
+        }
+        if (!hasFakePart) return false;
+
+        const chances = [0, 0.1, 0.3, 0.5];
+        const detected = Math.random() < (chances[this.order.knowledge] || 0);
+        if (detected) {
+            console.log("NPC发现了假货！罚金:", this.order.orderPriceDecided * 2);
+        }
+        return detected;
+    }
+
+    /** 处罚流程结束后继续成交 */
+    private onPenaltyResolved(): void {
+        if (this.order) {
+            this.doCompleteOrder();
+        } else {
+            MessMgr.emit(GameEvent.SettlementJudge);
+        }
+    }
+
+    /** 执行订单成交：加钱、对话、离场 */
+    private doCompleteOrder(): void {
         GameData.PlayerOrderNum = GameData.PlayerOrderNum + 1;
 
         // 1. 播放金币飞行动画

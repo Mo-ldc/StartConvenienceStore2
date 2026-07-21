@@ -75,5 +75,7 @@ export enum GameEvent {
     MobileClicked = "MobileClicked",
     /** 手机翻面 */
     MobileFlipped = "MobileFlipped",
+    /** 处罚流程结束 */
+    PenaltyResolved = "PenaltyResolved",
 }
 Enum(GameEvent);

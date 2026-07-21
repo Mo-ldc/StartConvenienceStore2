@@ -30,6 +30,8 @@ export enum UIName {
     uiResult = "uiResult",
     /** 失败界面 */
     uiFail = "uiFail",
+    /** 处罚界面 */
+    uiPenalty = "uiPenalty",
 }
 
 @ccclass('UIMgr')

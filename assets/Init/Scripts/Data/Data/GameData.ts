@@ -286,4 +286,20 @@ export class GameData
     static set TodayLoan ( value: number ){
         DataMgr.getInstance().setItem( 'TodayLoan', value );
     }
+
+    /** 是否进入处罚状态 */
+    static get IsPenalty(): boolean {
+        return DataMgr.getInstance().getItem('IsPenalty') === true;
+    }
+    static set IsPenalty(value: boolean): void {
+        DataMgr.getInstance().setItem('IsPenalty', value);
+    }
+
+    /** 罚金金额 */
+    static get PenaltyAmount(): number {
+        return DataMgr.getInstance().getItem('PenaltyAmount') || 0;
+    }
+    static set PenaltyAmount(value: number): void {
+        DataMgr.getInstance().setItem('PenaltyAmount', value);
+    }
 }
