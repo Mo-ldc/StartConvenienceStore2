@@ -546,14 +546,12 @@ export class PartBase extends Component {
                 this.node.setSiblingIndex(targetIdx);
             }
             this.isMobileOpen = false;
+            MessMgr.emit(GameEvent.PartPlacedOnPhone, this);
+            if (this.needsFix) {
+                this.startFixPhase();
+            }
             tween(this.node)
                 .to(0.1, { position: this.initLocalPos })
-                .call(() => {
-                    MessMgr.emit(GameEvent.PartPlacedOnPhone, this);
-                    if (this.needsFix) {
-                        this.startFixPhase();
-                    }
-                })
                 .start();
         }
     }

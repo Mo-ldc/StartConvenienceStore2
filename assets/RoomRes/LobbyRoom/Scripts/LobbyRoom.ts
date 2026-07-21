@@ -140,7 +140,10 @@ export class LobbyRoom extends BaseRoom {
         this.role.setRoleSpr(roleKey);
         this.initOrderInfo(order, order.guestName);
         this.initNumShow(order);
-        // console.log("初始化订单:", order);
+
+        this.damageTable.scale = new Vec3(0, 0, 1);
+        this.damageTable.active = false;
+        this._damageTableVisible = false;
 
        
 

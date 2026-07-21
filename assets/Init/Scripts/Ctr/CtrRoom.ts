@@ -169,15 +169,11 @@ export class CtrRoom extends CtrBase  {
 
     /** 跳转到维修界面且生成对应的零件 */
     private jumpToRepairRoom(): void {
-        if (!this.repairRoom) {
-            console.warn("维修房间不存在")
-            return;
-        }
+        if (!this.repairRoom) return;
         if (this.repairRoom.toGeneratePartType != PartType.无) {
             this.repairRoom.onJumpBack();
-            MessMgr.emit(GameEvent.ChangeRoom, RoomEnum.RepairRoom);
         }
-
+        MessMgr.emit(GameEvent.ChangeRoom, RoomEnum.RepairRoom);
     }
 }
 
