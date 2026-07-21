@@ -189,14 +189,6 @@ export class RepairRoom extends BaseRoom {
         if(!data){
             console.log("没有这个零件 数据：", btn.partType);
         }
-        let itemDataArr = [
-            {quality: Quality.低, isReal: true},
-            {quality: Quality.低, isReal: false},
-            {quality: Quality.中, isReal: true},
-            {quality: Quality.中, isReal: false},
-            {quality: Quality.高, isReal: true},
-            {quality: Quality.高, isReal: false}
-        ]
         const sprData = this.sprSetArr.find((item) => item.partType == btn.partType );
         if(sprData){
             this.partBtnRoot.getComponent(Sprite).spriteFrame = sprData.listBgSpr;
@@ -213,18 +205,17 @@ export class RepairRoom extends BaseRoom {
             btnSrc.node.active = true;
             btnSrc.partType = item.partType;
             btnSrc.getComponent(Sprite).spriteFrame = sprData.gridBgSpr;
-            let itemData  = itemDataArr[i];
             
-            if(itemData && sprData){
-                switch (itemData.quality) {
+            if(sprData){
+                switch (item.quality) {
                     case Quality.低:
-                        btnSrc.spr.spriteFrame = itemData.isReal ? sprData.lowSpr : sprData.lowFakeSpr;
+                        btnSrc.spr.spriteFrame = item.isReal ? sprData.lowSpr : sprData.lowFakeSpr;
                         break;
                     case Quality.中:
-                        btnSrc.spr.spriteFrame = itemData.isReal ? sprData.middleSpr : sprData.middleFakeSpr;
+                        btnSrc.spr.spriteFrame = item.isReal ? sprData.middleSpr : sprData.middleFakeSpr;
                         break;
                     case Quality.高:
-                        btnSrc.spr.spriteFrame = itemData.isReal ? sprData.highSpr : sprData.highFakeSpr;
+                        btnSrc.spr.spriteFrame = item.isReal ? sprData.highSpr : sprData.highFakeSpr;
                         break;
                 }
             }
