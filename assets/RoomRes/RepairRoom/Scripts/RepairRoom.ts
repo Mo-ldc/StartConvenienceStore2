@@ -493,7 +493,7 @@ export class RepairRoom extends BaseRoom {
             
             // 损坏零件
             let damagedPart = mobileComp.getDamagedPart();
-            this.faultSpr.spriteFrame = damagedPart.node.getComponent(Sprite).spriteFrame;
+            this.faultSpr.spriteFrame = damagedPart.ani.getComponent(Sprite).spriteFrame;
             this.faultNode.active = true;
         } else {
             console.error("无法获得手机")
