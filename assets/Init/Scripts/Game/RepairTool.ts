@@ -29,6 +29,10 @@ export class RepairTool extends Component {
     public useToolSound: AudioName = AudioName.None;
 
 
+    /** 外发光节点 */
+    @property({ type: Node, tooltip: '外发光节点' })
+    public outerGlowNode: Node = null;
+
     /** 是否与零件相交 */
     public isIntersectingPart: boolean = false;
     /** 当步骤是否完成 */
@@ -36,6 +40,9 @@ export class RepairTool extends Component {
 
     /** 是否正在播放音效 */
     private isPlayingSound: boolean = false;
+
+    /** 是否被拖拽中 */
+    public isBeingDragged: boolean = false;
 
     protected onLoad(): void {
         this.initPosition = this.node.position.clone();
@@ -49,15 +56,24 @@ export class RepairTool extends Component {
         this.isIntersectingPart = false;
         this.isStepComplete = false;
         this.setOpacity(255);
+        this.setOuterGlow(false);
+        this.isBeingDragged = true;
         // AudioMgr.PlaySound(AudioName.PickPart)
         tween(this.node)
             .to(0.2, { scale: new Vec3(1.2, 1.2, 1) }, { easing: 'bounceOut' })
             .start();
     }
+    /** 设置外发光 */
+    public setOuterGlow(isGlow: boolean){
+        if (this.outerGlowNode) {
+            this.outerGlowNode.active = isGlow;
+        }
+    }
 
     /** 回归原位 */
     public backToInitPosition(){
         // console.log('回归原位');
+        this.isBeingDragged = false;
         this.setOpacity(255);
         tween(this.node)
             .to(0.2, { scale: new Vec3(1, 1, 1) })

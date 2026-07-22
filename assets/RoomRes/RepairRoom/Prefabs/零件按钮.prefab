@@ -756,6 +756,9 @@
     "numLabel": {
       "__id__": 17
     },
+    "selectedNode": {
+      "__id__": 20
+    },
     "_id": ""
   },
   {

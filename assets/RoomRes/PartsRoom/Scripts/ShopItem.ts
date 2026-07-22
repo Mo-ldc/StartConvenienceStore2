@@ -8,6 +8,7 @@ import { AudioMgr, AudioName } from 'db://assets/Init/Scripts/Mgr/AudioMgr';
 import { MessMgr } from 'db://assets/Init/Scripts/Mgr/MessMgr';
 import { CtrMgr } from 'db://assets/Init/Scripts/Mgr/CtrMgr';
 import { UIMgr } from 'db://assets/Init/Scripts/Mgr/UIMgr';
+import PlatForm from 'db://assets/Init/Scripts/Tool/PlatForm';
 const { ccclass, property } = _decorator;
 @ccclass('ShopItemSprSet')
 class ShopItemSprSet{
@@ -51,8 +52,7 @@ export class ShopItem extends Component {
     bg:Sprite = null;
     @property({ type: Sprite, tooltip: '商品图片' })
     shopSpr:Sprite = null;
-    @property({ type: Node, tooltip: '购买按钮' })
-    buy:Node = null;
+
     @property({ type: Label, tooltip: '价格文本' })
     priceLabel:Label = null;
 
@@ -77,9 +77,11 @@ export class ShopItem extends Component {
     objKey:string = "";
     protected onEnable(): void {
         MessMgr.on(GameEvent.UpdateObjectCount, this.updateCount, this);
+        this.node.on(Node.EventType.TOUCH_END, this.onClickBuy, this);
     }
     protected onDisable(): void {
         MessMgr.off(GameEvent.UpdateObjectCount, this.updateCount, this);
+        this.node.off(Node.EventType.TOUCH_END, this.onClickBuy, this);
     }
 
     /** 商品数据 */
@@ -134,19 +136,27 @@ export class ShopItem extends Component {
     /** 点击购买 */
     private onClickBuy(): void {
         if(!this.shopData){
+            console.warn("缺少商品数据：" + this.objKey);
             return;
         }
         const saveData = GameData.getObjectStorageData(this.objKey);
         if(!saveData){
-
+            console.warn("缺少存储数据：" + this.objKey);
             return;
         }
-        if(this.shopData.isLock && !saveData.isUnlocked){
+
+        if (this.shopData.isLock && !saveData.isUnlocked) {
+            console.warn("请先解锁：" + this.objKey);
             UIMgr.getInstance().showTip("请先解锁");
+            PlatForm.getInstance().Ui_Ad_GetReward(() => {
+                GameData.setObjectStorageData(this.objKey, { count: saveData.count, isUnlocked: true });
+                MessMgr.emit(GameEvent.UpdateObjectCount, this.objKey);
+            });
             return;
         }
 
         if(GameData.PlayerCoin < this.shopData.shopPrice){
+            console.warn("金币不足：" + this.objKey);
             UIMgr.getInstance().showTip("金币不足");
             return;
         }
@@ -161,15 +171,6 @@ export class ShopItem extends Component {
         MessMgr.emit(GameEvent.JumpToRepairRoom);
     }
 
-    /** 点击解锁 */
-    private onClickUnlock(): void {
-        const saveData = GameData.getObjectStorageData(this.objKey);
-        if(!saveData || saveData.isUnlocked){
-            return;
-        }
-        GameData.setObjectStorageData(this.objKey, { count: saveData.count, isUnlocked: true });
-        MessMgr.emit(GameEvent.UpdateObjectCount, this.objKey);
-    }
 }
 
 

@@ -82,6 +82,13 @@ export class RepairRoom extends BaseRoom {
     @property({ type: Label, tooltip: '故障标签' })
     public  faultLabel : Label = null;
 
+    /** 故障部件图片 */
+    @property({ type: Sprite, tooltip: '故障图片' })
+    public  faultSpr: Sprite = null;
+    /** 故障标识节点 */
+    @property({ type: Node, tooltip: '故障标识节点' })
+    public  faultNode: Node = null;
+
     /** 当前在修的手机 */
     public  repairMobile: Mobile = null;
 
@@ -108,7 +115,8 @@ export class RepairRoom extends BaseRoom {
     /** 零件按钮预制体 */
     @property({ type: Prefab, tooltip: '零件按钮预制体' })
     public  partBtnPrefab: Prefab = null;
-
+    /** 是否显示列表 */
+    public  isShowList: boolean = false;
 
     /** 跳转生成零件 */
     public toGeneratePartType: PartType = PartType.无;
@@ -121,6 +129,7 @@ export class RepairRoom extends BaseRoom {
         this.partBtnRoot.active = false;
         this.partBtnRoot.x = this.listHideX;
         this.toGeneratePartType = PartType.无;
+        this.isShowList = false;
     }
 
     registerEvent(): void {
@@ -150,6 +159,7 @@ export class RepairRoom extends BaseRoom {
             if (tool) {
                 this.toolQueue.push(tool);
             }
+            tool.setOuterGlow(false);
         }
         this.toolProgressBar.setProgress(0);
         this.toolProgressBar.node.active = true;
@@ -163,6 +173,7 @@ export class RepairRoom extends BaseRoom {
             const btnSrc = btn.getComponent(PartListBtn);
             if (!btnSrc) continue;
             this.partBtnTypeList.push(btnSrc);
+            btn.on(Node.EventType.TOUCH_END, this.onClickPartTypeBtn.bind(this, btnSrc), this);
         }
 
         this.partBtnList = [];
@@ -173,6 +184,7 @@ export class RepairRoom extends BaseRoom {
             this.partBtnList.push(btnSrc);
             btn.parent = this.partBtnRoot;
             btn.active = false;
+            btn.on(Node.EventType.TOUCH_END, this.onClickPartBtn.bind(this, btnSrc), this);
         }
         // console.log("初始化零件按钮列表:", this.partBtnList.length, this.partBtnTypeList.length);
     }
@@ -205,7 +217,11 @@ export class RepairRoom extends BaseRoom {
             btnSrc.node.active = true;
             btnSrc.partType = item.partType;
             btnSrc.getComponent(Sprite).spriteFrame = sprData.gridBgSpr;
-            
+            if(this.repairMobile && this.repairMobile.mobileInfo.quality == item.quality){
+                btnSrc.selectedNode.active = true;
+            }else{
+                btnSrc.selectedNode.active = false;
+            }
             if(sprData){
                 switch (item.quality) {
                     case Quality.低:
@@ -220,6 +236,7 @@ export class RepairRoom extends BaseRoom {
                 }
             }
         }
+        this.showPartList();
     }
     /** 点击材料列表按钮 */
     private onClickPartListBtn(btn:PartBtn,event: EventTouch) {
@@ -330,15 +347,19 @@ export class RepairRoom extends BaseRoom {
             this.stepLabel.string = hint.message;
             
         }
-        if(this.toolSpr){
-
-            let tool = this.toolQueue.find(t => t.toolType === hint.toolType);
-            if(tool){
-                this.toolSpr.spriteFrame = tool.node.getComponent(Sprite).spriteFrame;
-            }else{
-                this.toolSpr.spriteFrame = null;
+        const tool = this.toolQueue.find(t => t.toolType === hint.toolType);
+        if (tool) {
+            if(this.toolSpr)
+            this.toolSpr.spriteFrame = tool.node.getComponent(Sprite).spriteFrame;
+        
+            if(tool.isBeingDragged == false){
+                tool.setOuterGlow(true);
             }
+        } else {
+            if(this.toolSpr)
+            this.toolSpr.spriteFrame = null;
         }
+
         if (this.faultLabel) {
             const damaged = this.repairMobile.getDamagedPartType();
             if (damaged) {
@@ -374,6 +395,14 @@ export class RepairRoom extends BaseRoom {
         this.toolProgressBar.upDateData(dt, part.useTime, part.getCurrentStepTime());
     }
 
+    /** 点击零件按钮 */
+    private onClickPartBtn(btn: PartBtn, event: EventTouch) {
+        AudioMgr.PlaySound(AudioName.BtnClick);
+        this.onClickPartListBtn(btn, event);
+        this.hidePartList();
+    }
+
+
     protected onTouchStart(event: EventTouch) {
         for (let i = 0; i < this.toolQueue.length; i++) {
             const tool = this.toolQueue[i];
@@ -391,26 +420,6 @@ export class RepairRoom extends BaseRoom {
                 return;
             }
         }
-        /** 是否点击了零件按钮 */
-        for (let i = 0; i < this.partBtnList.length; i++) {
-            const btn = this.partBtnList[i];
-            if (btn && btn.node.active && btn.checkClickPosition(event)) {
-                this.onClickPartListBtn(btn, event);
-                this.hidePartList();
-                return;
-            }
-        }
-
-        /** 是否点击了零件种类按钮 */
-        for (let i = 0; i < this.partBtnTypeList.length; i++) {
-            const btn = this.partBtnTypeList[i];
-            if (btn.checkClickPosition(event)) {
-                this.onClickPartTypeBtn(btn, event);
-                this.showPartList();
-                return;
-            }
-        }
-        this.hidePartList();
     }
     public onTouchMove(event: EventTouch) {
         if (!this.usingTool) return;
@@ -460,6 +469,7 @@ export class RepairRoom extends BaseRoom {
             this.toolProgressBar.node.active = false;
             MessMgr.emit(GameEvent.PutDownTool, tool.toolType);
         }
+        this.hidePartList();
     }
     public addMobile(mobile: Node, mobileKey: string): void {
         if(!mobile){
@@ -480,8 +490,16 @@ export class RepairRoom extends BaseRoom {
             mobileComp.refreshPartRefs();
             mobileComp.flipToDamagedSide();
             console.log("获得 当前在修的手机")
-        }else{
+            
+            // 损坏零件
+            let damagedPart = mobileComp.getDamagedPart();
+            this.faultSpr.spriteFrame = damagedPart.node.getComponent(Sprite).spriteFrame;
+            this.faultNode.active = true;
+        } else {
             console.error("无法获得手机")
+
+            this.faultSpr.spriteFrame = null;
+            this.faultNode.active = false;
         }
     }
 
@@ -514,12 +532,17 @@ export class RepairRoom extends BaseRoom {
         this.mobile = null;
         if (this.stepLabel) this.stepLabel.string = '';
         if (this.faultLabel) this.faultLabel.string = '';
+        if (this.faultSpr) this.faultSpr.spriteFrame = null;
+        if (this.faultNode) this.faultNode.active = false;
     }
     /** 显示零件列表 */
     private showPartList(): void {
         this.partBtnRoot.active = true;
         tween(this.partBtnRoot)
+            .to(0.05, { x: this.listHideX })
             .to(0.2, { x: this.listShowX })
+            .call(() => {
+            })
             .start();
     }
 
